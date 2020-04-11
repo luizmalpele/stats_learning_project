@@ -4,13 +4,13 @@
 
 Team members: 
 
-- Student 1 [Rei](mailto:rsanchezarias@floridapoly.edu)
+- Student 1 [Luiz Gustavo Fagundes Malpele](mailto:lfagundesmalpele664@floridapoly.edu)
 
-- Student 2 [Student 2](mailto:student2@floridapoly.edu)
+- Student 2 [Isabel Zimmerman](mailto:izimmerman5298@floridapoly.edu)
 
-- Student 3 [Student 3](mailto:student3@floridapoly.edu)
+- Student 3 [Cindy Nguyen](mailto:cnguyen5356@floridapoly.edu)
 
 
-Our project investigates the main characteristics of popular movies in recent years.
+Our project investigates the reliability of job advertisings on the Internet.
 We will be using the data available at: 
-<https://github.com/reisanar/datasets/blob/master/IMDB_movies.csv> 
+<https://www.kaggle.com/shivamb/real-or-fake-fake-jobposting-prediction> 
