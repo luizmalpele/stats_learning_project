@@ -1,4 +1,4 @@
-# Final Project for Intro to Data Science
+# Final Project for Statistical Learning
 
 ## Spring 2020
 
