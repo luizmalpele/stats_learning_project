@@ -1,0 +1,18 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(caret)
+library(lattice)
+
+# Get barstool data off github
+job_post <- read_csv("https://raw.githubusercontent.com/luizmalpele/StatsLearningProject/master/data/fake_job_postings.csv?token=ANQHB6TNXQAFKHFJBS6F35S6SNMZ4")
+```
+
+```{r}
+job_post
+```
+
