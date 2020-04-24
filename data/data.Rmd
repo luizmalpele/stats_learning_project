@@ -12,29 +12,33 @@ library(tidyverse)
 Get the data
 ```{r}
 tuition_cost <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/tuition_cost.csv')
+
 salary_potential <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/salary_potential.csv')
 
-```
-
-Unused data, may come back to this at a later point 
-```{r}
-# tuition_income <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/tuition_income.csv') 
+# tuition_income <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/tuition_income.csv')
 # 
 # historical_tuition <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/historical_tuition.csv')
-# 
-# diversity_school <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/diversity_school.csv')
-```
 
+diversity_school <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/diversity_school.csv')
+```
 
 Rename column from state_name to state so we can join easily
 ```{r}
 colnames(salary_potential)[3] <- "state"
 ```
 
-Join tuition cost and salary potential
+Join tuition_cost, diversity_school, and salary_potential
 ```{r}
-college_data <- dplyr::left_join(tuition_cost, salary_potential, by = c("name", "state"))
+college_data <- dplyr::left_join(tuition_cost, diversity_school, by = c("name", "state"))
+college_data <- dplyr::left_join(college_data, salary_potential, by = c("state", "name"))
 ```
+
+```{r}
+college_data <- college_data %>% 
+  pivot_wider(names_from=category, values_from=enrollment) %>% 
+  select(-"NA")
+```
+
 
 ```{r}
 glimpse(college_data)
