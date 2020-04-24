@@ -55,9 +55,23 @@ college_data %>%
 
 ```{r}
 college_data %>% 
-  filter(!is.na(make_world_better_percent), grep()) %>% 
+  filter(!is.na(make_world_better_percent), grepl(" art ", name, ignore.case = T) == T | 
+           grepl(" creative ", name, ignore.case = T) == T | 
+           grepl(" arts ", name, ignore.case = T) == T ) %>% 
   select(name, make_world_better_percent) %>% 
-  arrange(make_world_better_percent)
+  ggplot() +
+  geom_boxplot(mapping = aes(y = make_world_better_percent)) -> arts_box
+
+college_data %>% 
+  filter(!is.na(make_world_better_percent), grepl(" health ", name, ignore.case = T) == T | 
+           grepl(" nursing ", name, ignore.case = T) == T) %>% 
+  select(name, make_world_better_percent)  %>% 
+   ggplot() +
+   geom_boxplot(mapping = aes(y = make_world_better_percent)) -> health_box
+
+plot(arts_box)
+plot(health_box)
+
 ```
 Useful for EDA:
 -make a correlation matrix
