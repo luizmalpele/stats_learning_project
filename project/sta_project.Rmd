@@ -59,19 +59,6 @@ college_data %>%
            grepl(" creative ", name, ignore.case = T) == T | 
            grepl(" arts ", name, ignore.case = T) == T ) %>% 
   select(name, make_world_better_percent) %>% 
-  ggplot() +
-  geom_boxplot(mapping = aes(y = make_world_better_percent)) -> arts_box
-
-college_data %>% 
-  filter(!is.na(make_world_better_percent), grepl(" health ", name, ignore.case = T) == T | 
-           grepl(" nursing ", name, ignore.case = T) == T) %>% 
-  select(name, make_world_better_percent)  %>% 
-   ggplot() +
-   geom_boxplot(mapping = aes(y = make_world_better_percent)) -> health_box
-
-plot(arts_box)
-plot(health_box)
-
 ```
 Useful for EDA:
 -make a correlation matrix
@@ -92,12 +79,51 @@ What variables most impacts mid level pay? (LASSO or PCA + linear regression)
 
 
 ```{r}
+college_dataset <-  college_data %>% dummy_cols(select_columns = "degree_length") %>% dummy_cols(select_columns = "type") %>% rename(length_2y="degree_length_2 Year", length_4y="degree_length_4 Year", for_profit="type_For Profit", private="type_Private", public = "type_Public" ) %>% select(-degree_length_Other, -type_Other) %>%  filter(!is.na(make_world_better_percent)) %>% filter(!is.na(total_enrollment)) %>% 
+  mutate(women_ratio=round(women/total_enrollment*100, 2),
+         native_american_ratio=round(native_american/total_enrollment*100, 2),
+         asian=round(asian/total_enrollment*100, 2),
+         black_ratio=round(black/total_enrollment*100, 2),
+         hispanic_ratio=round(hispanic/total_enrollment*100, 2),
+         pacific_islander_ratio=round(pacific_islander/total_enrollment*100, 2),
+         white_ratio=round(white/total_enrollment*100, 2)) %>% 
+  mutate(ln_early_career_pay=log(early_career_pay),
+         ln_mid_career_pay=log(mid_career_pay),
+         ln_in_state_tuition=log(in_state_tuition),
+         ln_in_state_total=log(in_state_total),
+         ln_out_of_state_tuition=log(out_of_state_tuition),
+         ln_out_of_state_total=log(out_of_state_total),
+         ln_room_and_board=log(room_and_board))
+college_dataset
+```
 
+- Colleges for Profit did not collected data on "Make World Better".
+
+```{r}
+create_report(college_dataset)
+```
+
+```{r}
+college_dataset %>% 
+  ggplot() +
+  geom_histogram(mapping = aes(x = early_career_pay), 
+                 fill = "red",
+                 alpha = 0.6) +
+  geom_histogram(mapping = aes(x = mid_career_pay), 
+                 fill = "blue",
+                 alpha = 0.6) +
+  xlab("Pay") +
+  ylab("Count") +
+  theme_minimal()
 ```
 
 
 ```{r}
+college_dataset_shrinked <- online_courses %>% select(ln_completed_ratio, year, ln_participants, grade_above_zero, bachelor_ratio, ln_hours_certification_median)
+```
 
+```{r}
+ggpairs(college_dataset_shrinked)
 ```
 
 
