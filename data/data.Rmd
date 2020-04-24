@@ -33,11 +33,30 @@ college_data <- dplyr::left_join(tuition_cost, diversity_school, by = c("name", 
 college_data <- dplyr::left_join(college_data, salary_potential, by = c("state", "name"))
 ```
 
+Pivot tables to change race variable from row to column
 ```{r}
 college_data <- college_data %>% 
   pivot_wider(names_from=category, values_from=enrollment) %>% 
   select(-"NA")
 ```
+
+Data wrangling
+```{r}
+college_data <- college_data %>%
+  rename(asian=Asian, women=Women, 
+         native_american="American Indian / Alaska Native", 
+         black=Black, hispanic=Hispanic, 
+         pacific_islander="Native Hawaiian / Pacific Islander", 
+         white=White, two_more_races="Two Or More Races", 
+         unkown=Unknown,
+         foreign="Non-Resident Foreign", 
+         total_minority="Total Minority")
+```
+
+```{r}
+glimpse(college_data)
+```
+
 
 Export `college_data` as csv file
 ```{r}

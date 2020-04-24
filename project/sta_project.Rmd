@@ -6,7 +6,8 @@ output: html_notebook
 ```{r}
 library(tidyverse)
 library(caret)
-library(lattice)
+library(DataExplorer)
+library(fastDummies)
 ```
 ## Dataset
 Import processed data, which can be found [here] ("https://github.com/luizmalpele/stats_learning_project/blob/master/data/data.Rmd")
@@ -20,3 +21,69 @@ View data info
 ```{r}
 glimpse(college_data)
 ```
+
+Use DataExplorer to automatically create an EDA
+```{r}
+create_report(college_data)
+```
+
+EDA etc
+
+```{r}
+#overlay early pay distribution with middle play distribution
+college_data %>% 
+  ggplot() +
+  geom_histogram(mapping = aes(x = early_career_pay), 
+                 fill = "red",
+                 alpha = 0.6) +
+  geom_histogram(mapping = aes(x = mid_career_pay), 
+                 fill = "blue",
+                 alpha = 0.6) +
+  xlab("Pay") +
+  ylab("Count") +
+  theme_minimal()
+```
+
+What types of colleges want to make the world better?
+  (maybe subset grep(Art, creative) and grep(health, nursing) and compare boxplots of 'make_world_better_percent')
+```{r}
+college_data %>% 
+  filter(!is.na(make_world_better_percent)) %>% 
+  select(name, make_world_better_percent) %>% 
+  arrange(make_world_better_percent)
+```
+
+```{r}
+college_data %>% 
+  filter(!is.na(make_world_better_percent), grep()) %>% 
+  select(name, make_world_better_percent) %>% 
+  arrange(make_world_better_percent)
+```
+Useful for EDA:
+-make a correlation matrix
+
+Questions these models hope to answer
+-Does the aspiration of making the world better have an impact on the mid career payment?
+  -How does it affect the early stage of a students career?
+  -Does it apply to only some specific fields?
+
+-Are more diverse schools likely to have a higher % of alumni who want to change the world?
+
+-Do lower tuition and fees cause people to want to care more about the world?
+
+Translate these questions into statistical models:
+What variables most impacts mid level pay? (LASSO or PCA + linear regression)
+
+
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+
