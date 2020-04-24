@@ -1,6 +1,6 @@
 # Data Description: IMDB popular movies data
 
-We used the `tuition_cost` and `salary_potential` dataset available at 
+We used the `tuition_cost` and `salary_potential` datasets available at 
 https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-03-10/readme.md
 
 This dataset includes information of colleges. 
