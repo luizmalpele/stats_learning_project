@@ -1,4 +1,4 @@
-# Data Description: IMDB popular movies data
+# Data Description: College Data
 
 We used the `tuition_cost` and `salary_potential` datasets available at 
 https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-03-10/readme.md
