@@ -1,10 +1,8 @@
 # Data Description: IMDB popular movies data
 
-We use the `IMDB_movies.csv` dataset available at 
-<https://github.com/reisanar/datasets/blob/master/IMDB_movies.csv>
+We used the `tuition_cost` and `salary_potential` dataset available at 
+https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-03-10/readme.md
 
-This dataset includes information of popular movies on IMDB in the last 10 years. 
+This dataset includes information of colleges. 
 
-The data fields included are: Title, Genre, Description, Director, Actors, Year, Runtime, Rating, Votes, Revenue, Metascore (score of the movie on the metacritic website)
-
-Below we include some basic statistics for this datasets, including dimensions and range of years:
+The data fields included are: name (of school), state, state code (two letter abbreviation of state), type (Public, Private, For Profit, etc), degree length, room and board price, in state tuition, in state cost total price, out of state tuition, out of state cost total price, rank, early career pay (less than ), mid career pay ( ), percentage of alumni who want to make the world better, and percentage of univeristy in STEM degrees  
