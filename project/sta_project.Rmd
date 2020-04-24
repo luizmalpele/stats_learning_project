@@ -1,6 +1,8 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r}
@@ -8,6 +10,9 @@ library(tidyverse)
 library(caret)
 library(DataExplorer)
 library(fastDummies)
+library(leaps)
+library(cowplot)
+library(GGally)
 ```
 ## Dataset
 Import processed data, which can be found [here] ("https://github.com/luizmalpele/stats_learning_project/blob/master/data/data.Rmd")
@@ -53,13 +58,7 @@ college_data %>%
   arrange(make_world_better_percent)
 ```
 
-```{r}
-college_data %>% 
-  filter(!is.na(make_world_better_percent), grepl(" art ", name, ignore.case = T) == T | 
-           grepl(" creative ", name, ignore.case = T) == T | 
-           grepl(" arts ", name, ignore.case = T) == T ) %>% 
-  select(name, make_world_better_percent) %>% 
-```
+
 Useful for EDA:
 -make a correlation matrix
 
@@ -82,11 +81,12 @@ What variables most impacts mid level pay? (LASSO or PCA + linear regression)
 college_dataset <-  college_data %>% dummy_cols(select_columns = "degree_length") %>% dummy_cols(select_columns = "type") %>% rename(length_2y="degree_length_2 Year", length_4y="degree_length_4 Year", for_profit="type_For Profit", private="type_Private", public = "type_Public" ) %>% select(-degree_length_Other, -type_Other) %>%  filter(!is.na(make_world_better_percent)) %>% filter(!is.na(total_enrollment)) %>% 
   mutate(women_ratio=round(women/total_enrollment*100, 2),
          native_american_ratio=round(native_american/total_enrollment*100, 2),
-         asian=round(asian/total_enrollment*100, 2),
+         asian_ratio=round(asian/total_enrollment*100, 2),
          black_ratio=round(black/total_enrollment*100, 2),
          hispanic_ratio=round(hispanic/total_enrollment*100, 2),
          pacific_islander_ratio=round(pacific_islander/total_enrollment*100, 2),
-         white_ratio=round(white/total_enrollment*100, 2)) %>% 
+         white_ratio=round(white/total_enrollment*100, 2),
+         minority_ratio=round(total_minority/total_enrollment*100, 2)) %>% 
   mutate(ln_early_career_pay=log(early_career_pay),
          ln_mid_career_pay=log(mid_career_pay),
          ln_in_state_tuition=log(in_state_tuition),
@@ -119,11 +119,33 @@ college_dataset %>%
 
 
 ```{r}
-college_dataset_shrinked <- online_courses %>% select(ln_completed_ratio, year, ln_participants, grade_above_zero, bachelor_ratio, ln_hours_certification_median)
+college_dataset_shrinked <- college_dataset %>% select(ln_early_career_pay, ln_mid_career_pay , make_world_better_percent ,minority_ratio, ln_out_of_state_total, ln_in_state_total, stem_percent )
+college_dataset_shrinked2 <- college_dataset %>% select(ln_early_career_pay, ln_mid_career_pay , make_world_better_percent, minority_ratio, hispanic_ratio, asian_ratio, black_ratio, hispanic_ratio, white_ratio)
 ```
 
 ```{r}
-ggpairs(college_dataset_shrinked)
+ggpairs(data = college_dataset_shrinked, lower = list(continuous = wrap("smooth", alpha = 0.3, size=0.1)))
 ```
 
+```{r}
+ggpairs(data = college_dataset_shrinked2, lower = list(continuous = wrap("smooth", alpha = 0.3, size=0.1)))
+```
+
+```{r}
+college_dataset %>% ggplot() + geom_point(aes(x=ln_out_of_state_total, y=make_world_better_percent, color = type), alpha = 0.6) + 
+  labs(
+    title = "Log of Out of State Total versus Percentage of Students seeking a Better World ", 
+    x = "Log of Out of State Total", 
+    y = "Percentage Students seeking a Better World", 
+    color = "Type of Institution") + scale_color_brewer(palette = "Set1")
+```
+
+```{r}
+college_dataset %>% ggplot() + geom_point(aes(x=ln_out_of_state_total, y=ln_early_career_pay, color = type), alpha = 0.6) + 
+  labs(
+    title = "Log of Out of State Total versus Percentage of Students seeking a Better World ", 
+    x = "Log of Out of State Total", 
+    y = "Percentage Students seeking a Better World", 
+    color = "Type of Institution") + scale_color_brewer(palette = "Set1")
+```
 
