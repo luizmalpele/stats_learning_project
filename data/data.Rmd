@@ -27,7 +27,7 @@ Rename column from state_name to state so we can join easily
 colnames(salary_potential)[3] <- "state"
 ```
 
-Join tuition_cost, diversity_school, and salary_potential
+Join `tuition_cost`, `diversity_school`, and `salary_potential`
 ```{r}
 college_data <- dplyr::left_join(tuition_cost, diversity_school, by = c("name", "state"))
 college_data <- dplyr::left_join(college_data, salary_potential, by = c("state", "name"))
@@ -39,8 +39,10 @@ college_data <- college_data %>%
   select(-"NA")
 ```
 
-
+Export `college_data` as csv file
 ```{r}
-glimpse(college_data)
+write.csv(college_data, "./college_data.csv", row.names = F)
 ```
+
+
 

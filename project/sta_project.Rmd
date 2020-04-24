@@ -7,12 +7,16 @@ output: html_notebook
 library(tidyverse)
 library(caret)
 library(lattice)
-
-# Get barstool data off github
-job_post <- read_csv("https://raw.githubusercontent.com/luizmalpele/StatsLearningProject/master/data/fake_job_postings.csv?token=ANQHB6TNXQAFKHFJBS6F35S6SNMZ4")
 ```
+## Dataset
+Import processed data, which can be found [here] ("https://github.com/luizmalpele/stats_learning_project/blob/master/data/data.Rmd")
 
 ```{r}
-job_post
+#read preprocessed data
+college_data <- read.csv(file = '../data/college_data.csv')
 ```
 
+View data info
+```{r}
+glimpse(college_data)
+```
