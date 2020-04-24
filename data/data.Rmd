@@ -1,5 +1,5 @@
 ---
-title: "Final Report for Intro to Data Science"
+title: "data"
 output: html_notebook
 ---
 
@@ -8,31 +8,23 @@ This is where the final project report write-up goes.
 library(tidytuesdayR)
 library(tidyverse)
 library(caret)
+library(readr)
 ```
 
 
-Before you submit, make sure everything runs as expected.
-
-You can add sections as you see fit. Make sure you have a section called "Introduction" at the beginning and a section called "Conclusion" at the end. The rest is up to you!
 ```{r}
 # Get the Data
 
 tuition_cost <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/tuition_cost.csv')
-
 tuition_income <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/tuition_income.csv') 
-
 salary_potential <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/salary_potential.csv')
-
 historical_tuition <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/historical_tuition.csv')
-
 diversity_school <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/diversity_school.csv')
 
 # Or read in with tidytuesdayR package (https://github.com/thebioengineer/tidytuesdayR)
 # PLEASE NOTE TO USE 2020 DATA YOU NEED TO USE tidytuesdayR version ? from GitHub
 
 # Either ISO-8601 date or year/week works!
-
-# Install via devtools::install_github("thebioengineer/tidytuesdayR")
 
 tuesdata <- tidytuesdayR::tt_load('2020-03-10')
 tuesdata <- tidytuesdayR::tt_load(2020, week = 11)
@@ -43,6 +35,7 @@ tuition_cost <- tuesdata$tuition_cost
 
 ```{r}
 college_data <- dplyr::left_join(tuition_cost, diversity_school, by = c("name", "state"))
-
+colnames(college_data)[2] <- "state_name"
+college_data <- dplyr::left_join(college_data, salary_potential, by = c("state_name", "name"))
 ```
 
