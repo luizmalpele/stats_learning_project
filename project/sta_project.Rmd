@@ -78,7 +78,17 @@ What variables most impacts mid level pay? (LASSO or PCA + linear regression)
 
 
 ```{r}
-college_dataset <-  college_data %>% dummy_cols(select_columns = "degree_length") %>% dummy_cols(select_columns = "type") %>% rename(length_2y="degree_length_2 Year", length_4y="degree_length_4 Year", for_profit="type_For Profit", private="type_Private", public = "type_Public" ) %>% select(-degree_length_Other, -type_Other) %>%  filter(!is.na(make_world_better_percent)) %>% filter(!is.na(total_enrollment)) %>% 
+college_dataset <-  college_data %>% 
+  dummy_cols(select_columns = "degree_length") %>% 
+  dummy_cols(select_columns = "type") %>% 
+  rename(length_2y="degree_length_2 Year", 
+         length_4y="degree_length_4 Year", 
+         for_profit="type_For Profit", 
+         private="type_Private", 
+         public = "type_Public") %>% 
+  select(-degree_length_Other, -type_Other) %>%  
+  filter(!is.na(make_world_better_percent)) %>% 
+  filter(!is.na(total_enrollment)) %>% 
   mutate(women_ratio=round(women/total_enrollment*100, 2),
          native_american_ratio=round(native_american/total_enrollment*100, 2),
          asian_ratio=round(asian/total_enrollment*100, 2),
@@ -119,8 +129,25 @@ college_dataset %>%
 
 
 ```{r}
-college_dataset_shrinked <- college_dataset %>% select(ln_early_career_pay, ln_mid_career_pay , make_world_better_percent ,minority_ratio, ln_out_of_state_total, ln_in_state_total, stem_percent )
-college_dataset_shrinked2 <- college_dataset %>% select(ln_early_career_pay, ln_mid_career_pay , make_world_better_percent, minority_ratio, hispanic_ratio, asian_ratio, black_ratio, hispanic_ratio, white_ratio)
+college_dataset_shrinked <- college_dataset %>% 
+  select(ln_early_career_pay, 
+         ln_mid_career_pay, 
+         make_world_better_percent,
+         minority_ratio, 
+         ln_out_of_state_total, 
+         ln_in_state_total, 
+         stem_percent)
+
+college_dataset_shrinked2 <- college_dataset %>% 
+  select(ln_early_career_pay, 
+         ln_mid_career_pay, 
+         make_world_better_percent, 
+         minority_ratio, 
+         hispanic_ratio, 
+         asian_ratio, 
+         black_ratio, 
+         hispanic_ratio, 
+         white_ratio)
 ```
 
 ```{r}
@@ -132,7 +159,9 @@ ggpairs(data = college_dataset_shrinked2, lower = list(continuous = wrap("smooth
 ```
 
 ```{r}
-college_dataset %>% ggplot() + geom_point(aes(x=ln_out_of_state_total, y=make_world_better_percent, color = type), alpha = 0.6) + 
+college_dataset %>% 
+  ggplot() + 
+  geom_point(aes(x=ln_out_of_state_total, y=make_world_better_percent, color = type), alpha = 0.6) + 
   labs(
     title = "Log of Out of State Total versus Percentage of Students seeking a Better World ", 
     x = "Log of Out of State Total", 
@@ -141,7 +170,9 @@ college_dataset %>% ggplot() + geom_point(aes(x=ln_out_of_state_total, y=make_wo
 ```
 
 ```{r}
-college_dataset %>% ggplot() + geom_point(aes(x=ln_out_of_state_total, y=ln_early_career_pay, color = type), alpha = 0.6) + 
+college_dataset %>% 
+  ggplot() + 
+  geom_point(aes(x=ln_out_of_state_total, y=ln_early_career_pay, color = type), alpha = 0.6) + 
   labs(
     title = "Log of Out of State Total versus Percentage of Students seeking a Better World ", 
     x = "Log of Out of State Total", 
