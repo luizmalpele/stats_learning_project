@@ -180,3 +180,43 @@ college_dataset %>%
     color = "Type of Institution") + scale_color_brewer(palette = "Set1")
 ```
 
+Separating the data into Train and Test__
+
+```{r}
+set.seed(123)
+train_control <-  trainControl(method = "cv", number = 10)
+inTrain <- createDataPartition(y = college_dataset$ln_early_career_pay, p = 0.7, list = FALSE)
+train_set <- college_dataset[inTrain , ]
+test_set <- college_dataset[-inTrain , ]
+```
+
+  This command separates 70% of the data into a training set, and other 30% into a testing set. This is done to avoid overfitting and it is preferable to perform the final model selection with an out of sample criterion.
+
+__Variables selection__
+
+```{r}
+#Separating the data
+sub_fit_pay <- regsubsets(ln_early_career_pay ~  asian_ratio + ln_out_of_state_tuition + stem_percent + ln_room_and_board + private + black_ratio + rank + women_ratio, data = train_set)
+best_summary <- summary(sub_fit_pay)
+
+#Plots
+par(mfrow = c(1,2)) 
+plot(best_summary$cp, xlab = "Number of features", ylab = "Mallows Cp", main = "Optimal Number of Predictors: Cp", col = "dark blue", type = "b")
+plot(sub_fit_pay, scale = "Cp", main = "Best Variables for Modelling", col = "dark red")
+par(mfrow = c(1,2))
+plot(best_summary$adjr2, xlab = "Number of features", ylab = "Adjusted-R^2", main = "Optimal Number of Predictors", col = "dark blue", type = "b")
+plot(best_summary$bic, xlab = "Number of features", ylab = "BIC", main = "Optimal Number of Predictors", col = "dark red", type = "b")
+```
+
+ Based on BIC, Mallows' CP, and the $Adjusted-R^2$, the select model will account for 6 predictors, more than this will result in overfitting and these variables will be: __stem_percent, room_and_board, ln_out_of_state_tuition, rank, women_ratio, black_ratio, and asian_ratio__. 
+ 
+# Modeling With other Techniques
+
+## Simple Limnear Regression
+ 
+```{r}
+earlypay_lm <- lm(ln_early_career_pay ~  asian_ratio + ln_out_of_state_tuition + stem_percent + ln_room_and_board + black_ratio + rank + women_ratio, data = train_set)
+summary(earlypay_lm)
+```
+
+
