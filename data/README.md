@@ -7,7 +7,7 @@ This dataset includes information of colleges all around the United States regar
 
 # Data Dictionary
 
-|Field Name | Description | Data Type | Data Size|
+|Field Name | Description | Data Type | Number of Observations|
 |:----------|:---------------|:---------|:------------|
 |name|Institution Name|factor|486|
 |state_code|State Abbreviation|factor|486|
