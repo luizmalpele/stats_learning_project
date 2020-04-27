@@ -1,0 +1,784 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Final Project},
+  pdfauthor={Luiz Gustavo Fagundes Malpele, Cindy Nguyen, Isabel Zimmerman},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs}
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\title{Final Project}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{STA3241.01 -- April 27, 2020}
+\author{Luiz Gustavo Fagundes Malpele, Cindy Nguyen, Isabel Zimmerman}
+\date{}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+The aim of this report was to predict early and mid career pay for
+college graduates from data collected on independent variables such as:
+tuition costs, school enrollment size, percentage STEM of majors,
+percentage of minority students, etc. After a robust exploratory data
+analysis, various regression algorithms were created utilizing the
+libraries \texttt{tidyverse}, \texttt{caret}, \texttt{DataExplorer},
+\texttt{fastDummies}, \texttt{leaps}, \texttt{cowplot}, and
+\texttt{GGally}. All of the R code can be found at the GitHub
+\href{https://github.com/luizmalpele/stats_learning_project/}{here}.
+
+\hypertarget{dataset}{%
+\section{Dataset}\label{dataset}}
+
+We began by importing processed data from TidyTuesday, which can also be
+found
+\href{https://github.com/luizmalpele/stats_learning_project/blob/master/data/data.Rmd}{here}.
+
+From this data, we transformed all minority variables into percentages
+of total enrollment, and took the log of the following variables: early
+career pay, mid career pay, in state tuition, out of state tuition, room
+and board, and total enrollment. This was to create more normal
+distributions in the data and possibly remove heteroscedasticity. With
+the addition of these two features in the data, some of the models
+(particularly linear models) may improve in predictive power.
+
+\hypertarget{data-dictionary}{%
+\subsection{Data Dictionary}\label{data-dictionary}}
+
+\begin{longtable}[]{@{}llll@{}}
+\toprule
+\begin{minipage}[b]{0.19\columnwidth}\raggedright
+Field Name\strut
+\end{minipage} & \begin{minipage}[b]{0.28\columnwidth}\raggedright
+Description\strut
+\end{minipage} & \begin{minipage}[b]{0.18\columnwidth}\raggedright
+Data Type\strut
+\end{minipage} & \begin{minipage}[b]{0.23\columnwidth}\raggedright
+Number of Observations\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+name\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Institution Name\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+factor\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+state\_code\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+State Abbreviation\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+factor\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+make\_world\_better\_percent\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Percent of alumni who think they are making the world a better
+place\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+integer\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+room\_and\_board\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Room and board in USD\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+integer\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+ln\_room\_and\_board\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Natural Log of Room and board in U\$D\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+double\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+early\_career\_pay\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Estimated early career pay in USD\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+int\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+ln\_early\_career\_pay\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Natural log of estimated early career pay in USD\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+double\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+mid\_career\_pay\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Estimated mid career pay in USD\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+int\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+ln\_mid\_career\_pay\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Natural log of estimated mid career pay in USD\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+double\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+total\_enrollment\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Total enrollment of students\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+double\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+ln\_total\_enrollment\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Natural Log of Total enrollment of students\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+double\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+out\_of\_state\_tuition\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Tuition for out-of-state residents in USD\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+integer\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+ln\_out\_of\_state\_tuition\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Natural Log of Tuition for out-of-state residents in USD\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+double\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+in\_of\_state\_tuition\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Tuition for in-of-state residents in USD\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+integer\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+ln\_in\_of\_state\_tuition\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Natural Log of Tuition for in-of-state residents in USD\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+double\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+stem\_percent\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Percent of student body in STEM\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+double\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+private\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Type: 0 for Public, 1 for Private\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+integer\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+asian\_ratio\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Percentage of Asian Students\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+double\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+black\_ratio\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Percentage of Black Students\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+double\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+minority\_ratio\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Percentage of all Minorities Combined\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+double\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+hispanic\_ratio\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Percentage of Hispanic Students\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+double\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+women\_ratio\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Percentage of Women Students\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+double\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.19\columnwidth}\raggedright
+tuition\_ratio\strut
+\end{minipage} & \begin{minipage}[t]{0.28\columnwidth}\raggedright
+Out-of-State Tuition and In-State Tuition Ratio\strut
+\end{minipage} & \begin{minipage}[t]{0.18\columnwidth}\raggedright
+double\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\raggedright
+486\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\hypertarget{exploratory-data-analysis}{%
+\subsection{Exploratory Data Analysis}\label{exploratory-data-analysis}}
+
+The first step was to use the \texttt{DataExplorer} package to
+automatically create an EDA. This report can be found
+\href{https://github.com/luizmalpele/stats_learning_project/blob/master/project/EDA_report.html}{here}.
+Using this process was preferred as it automatically created all the
+univariate distributions and correlation matricies for the variables.
+This way, we were able to focus on creating more complex explorations
+that were fine-tuned to the question we wanted to answer.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#create_report(college_dataset)}
+\end{Highlighting}
+\end{Shaded}
+
+The first look into the data was to see how the distribution of pay
+shifted from early to mid career. We could tell that the distribution
+became wider and right-skewed for mid career pay and was higher on
+average; the mean early pay was \$51,000 whereas the mid career pay
+average was \$92,000.
+\includegraphics{sta_project_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+We next wanted to understand more thoroughly the impact of variables we
+thought would be higly significant in our regression models. The first
+variable we chose to explore was \emph{stem\_percent} as STEM majors
+tend to have higher paid jobs both right out of college and over time.
+In Figure A, it is observed that both early and mid career pay has
+relatively normal distributions. However, when observing schools with
+higher than 30\% STEM majors in Figure B, there is no longer a normal
+distribution; both early and mid career pay are observed to be
+proportionally hight, but do note that the sample size is much smaller
+for this visualization. Finally, we see that the less than 30\% STEM
+majors has a relatively similar distribution as the school totals; that
+is, this distribution is fairly normal.
+\includegraphics{sta_project_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+\hypertarget{modeling}{%
+\section{Modeling}\label{modeling}}
+
+\hypertarget{preprocessing}{%
+\subsection{Preprocessing}\label{preprocessing}}
+
+\includegraphics{sta_project_files/figure-latex/unnamed-chunk-10-1.pdf}
+\includegraphics{sta_project_files/figure-latex/unnamed-chunk-10-2.pdf}
+Based on the EDA, BIC, Mallows' CP, and the \(Adjusted-R^2\), the models
+will be tested on the following predictors:
+\emph{ln\_early\_career\_pay, asian\_ratio, ln\_out\_of\_state\_tuition,
+stem\_percent, ln\_total\_enrollment,} and \emph{women\_ratio}.. More
+than this will result in overfitting.
+
+\includegraphics{sta_project_files/figure-latex/unnamed-chunk-11-1.pdf}
+
+We then formed a correlation matrix between these variables; if
+variables are highly correlated, they can cause standard errors of
+models to be unreliable and cause poor models in general. From this, we
+found that the variables were, at most, about 60\% correlated. This was
+not worrisome in itself, but certainly something to keep in mind when
+evaluating results.
+
+For testing purposes, we created a train control variable in order to
+establish that each model would be tested with 10-fold cross-validation.
+This is to ensure that the models are not overfitting in the training
+phase, and it gives feedback on how well the model is performing. We
+also split the data so that 80\% of aribitrary but specific data is used
+to train, and the other 20\% is used to test the model's performance.
+This is also done to avoid overfitting, and it is preferable to perform
+the final model selection with an out of sample criterion.
+
+\hypertarget{best-model}{%
+\subsection{Best Model}\label{best-model}}
+
+\hypertarget{random-forest}{%
+\subsubsection{Random Forest}\label{random-forest}}
+
+We chose this because
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{oob <-}\StringTok{ }\KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"oob"}\NormalTok{)}
+\NormalTok{cv_}\DecValTok{5}\NormalTok{ <-}\StringTok{ }\KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"cv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{5}\NormalTok{)}
+\NormalTok{rf_grid <-}\StringTok{ }\KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{mtry =} \DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{)}
+
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{825}\NormalTok{)}
+\NormalTok{rf_model <-}\StringTok{ }\KeywordTok{train}\NormalTok{(ln_early_career_pay }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{data =}\NormalTok{ train_data,}
+                     \DataTypeTok{method =} \StringTok{"rf"}\NormalTok{,}
+                     \DataTypeTok{trControl =}\NormalTok{ oob,}
+                     \DataTypeTok{verbose =} \OtherTok{FALSE}\NormalTok{,}
+                     \DataTypeTok{tuneGrid =}\NormalTok{ rf_grid)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in randomForest.default(x, y, mtry = param$mtry, ...): invalid mtry:
+## reset to within valid range
+
+## Warning in randomForest.default(x, y, mtry = param$mtry, ...): invalid mtry:
+## reset to within valid range
+
+## Warning in randomForest.default(x, y, mtry = param$mtry, ...): invalid mtry:
+## reset to within valid range
+
+## Warning in randomForest.default(x, y, mtry = param$mtry, ...): invalid mtry:
+## reset to within valid range
+
+## Warning in randomForest.default(x, y, mtry = param$mtry, ...): invalid mtry:
+## reset to within valid range
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# print results}
+\NormalTok{rf_model}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Random Forest 
+## 
+## 391 samples
+##   5 predictor
+## 
+## No pre-processing
+## Resampling results across tuning parameters:
+## 
+##   mtry  RMSE        Rsquared 
+##    1    0.07381380  0.7566485
+##    2    0.07268202  0.7640539
+##    3    0.07326102  0.7602798
+##    4    0.07393627  0.7558403
+##    5    0.07389827  0.7560913
+##    6    0.07456265  0.7516859
+##    7    0.07485997  0.7497016
+##    8    0.07472893  0.7505771
+##    9    0.07486140  0.7496920
+##   10    0.07432065  0.7532951
+## 
+## RMSE was used to select the optimal model using the smallest value.
+## The final value used for the model was mtry = 2.
+\end{verbatim}
+
+\includegraphics{sta_project_files/figure-latex/unnamed-chunk-13-1.pdf}
+
+\includegraphics{sta_project_files/figure-latex/unnamed-chunk-14-1.pdf}
+
+\hypertarget{model-comparison}{%
+\subsubsection{Model Comparison}\label{model-comparison}}
+
+For brevity, the model selection results are posted below. We chose to
+highlight the random forest model as it has the highest \(R^2\) and the
+lowest in and out of sample RMSE. In order to see our analysis of the
+other models, see below in the \emph{Other Techniques} section.
+Furthermore, the random forest model can be displayed as a decision
+tree, and it is easy to interpret by people out of the Data Science
+field since it mirrors the human decision making process.
+
+\begin{longtable}[]{@{}llll@{}}
+\toprule
+Predictive Model & \(R^2\) & In Sample RMSE & Out of Sample
+RMSE\tabularnewline
+\midrule
+\endhead
+Ordinary Least Squares & 0.7382 & 0.07665 &\tabularnewline
+Ordinary Least Squares-glmnet & 0.07715067 & 0.7468707 &\tabularnewline
+Random Forest & 0.7640539 & 0.07268202 &\tabularnewline
+Principal Component Analysis & 0.7417742 & 0.07682088 &\tabularnewline
+Support Vector Machine & 0.7367368 & 0.07692738 &\tabularnewline
+\bottomrule
+\end{longtable}
+
+\hypertarget{other-techniques}{%
+\subsection{Other Techniques}\label{other-techniques}}
+
+\hypertarget{simple-linear-regression}{%
+\subsubsection{Simple Linear
+Regression}\label{simple-linear-regression}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{earlypay_lm <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(ln_early_career_pay }\OperatorTok{~}\StringTok{ }\NormalTok{., }
+                  \DataTypeTok{data =}\NormalTok{ train_data)}
+\KeywordTok{summary}\NormalTok{(earlypay_lm)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = ln_early_career_pay ~ ., data = train_data)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.24361 -0.04826 -0.00374  0.04307  0.40764 
+## 
+## Coefficients:
+##                           Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)              9.1334438  0.1200992  76.049  < 2e-16 ***
+## asian_ratio              0.0091614  0.0010750   8.522 3.60e-16 ***
+## ln_out_of_state_tuition  0.1425788  0.0102636  13.892  < 2e-16 ***
+## stem_percent             0.0029324  0.0003481   8.423 7.37e-16 ***
+## ln_total_enrollment      0.0308594  0.0038493   8.017 1.31e-14 ***
+## women_ratio             -0.0020555  0.0003963  -5.187 3.46e-07 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.07665 on 385 degrees of freedom
+## Multiple R-squared:  0.7416, Adjusted R-squared:  0.7382 
+## F-statistic:   221 on 5 and 385 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+This \textbf{Ordinary Least Squares} linear model is focused on the
+variable, \emph{ln\_early\_career\_pay}, and is being tested with seven
+other variables that were previously selected by the previous methods.
+The Adjusted-\(R^2\) is 0.7487 and all predictors are statistically
+significant to the analysis.
+
+\includegraphics{sta_project_files/figure-latex/unnamed-chunk-16-1.pdf}
+
+\includegraphics{sta_project_files/figure-latex/unnamed-chunk-17-1.pdf}
+The Root Mean Square Error of the out sample prediction was calculated
+by utilizing the testing set of the mean of the following difference
+squared: \((\hat{y}-y)^2\), also know as RMSE, the result was
+0.005810831. This is another linear graph that shows a comparison of the
+Actual and Forecast values, but only the test set or 20\% of the data
+was used. Again, the data is mostly surrounded around the (50,000 ,
+50,000) mark.
+
+\hypertarget{pca}{%
+\subsubsection{PCA}\label{pca}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{glm_pca_model <-}\StringTok{ }\KeywordTok{train}\NormalTok{(ln_early_career_pay }\OperatorTok{~}\StringTok{ }\NormalTok{. , }
+                 \DataTypeTok{data =}\NormalTok{ train_data, }
+                 \DataTypeTok{method =} \StringTok{"glm"}\NormalTok{, }
+                 \DataTypeTok{preProcess =} \StringTok{"pca"}\NormalTok{, }
+                 \DataTypeTok{trControl =}\NormalTok{ train_control)}
+\NormalTok{glm_pca_model}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Generalized Linear Model 
+## 
+## 391 samples
+##   5 predictor
+## 
+## Pre-processing: principal component signal extraction (5), centered (5),
+##  scaled (5) 
+## Resampling: Cross-Validated (10 fold) 
+## Summary of sample sizes: 352, 352, 351, 352, 351, 352, ... 
+## Resampling results:
+## 
+##   RMSE        Rsquared   MAE      
+##   0.07753735  0.7365653  0.0580205
+\end{verbatim}
+
+Principal Component Analysis, or PCA, is a type of linear transformation
+that allows you to visualize the overall format of the dataset. In a
+way, PCA ``tilts'' the dataset to be one dimensional. This will depend
+on the number of variables and will help to understand what variables
+are similar to each other and which are different. We utilized PCA to
+reduce the dimensionality of our dataset to make it easier to work with.
+In the linear model above, we have 391 samples with 8 predictors. The
+\emph{Rsquared} value of 0.7469513 tells us that the model that we are
+running is fitting the actual data by 74.7\%. It is ideal for
+\emph{RMSE} values to be as small as possible, or as close to zero on a
+zero to one scale. The \emph{RMSE} is 0.075609.
+
+\includegraphics{sta_project_files/figure-latex/unnamed-chunk-19-1.pdf}
+
+The PCA model shows the Forecast data being tested against Actual data.
+This training data is very similar to the training model for the Linear
+Model. This could mean that PCA simplified the dataset to the point of
+it being
+
+\includegraphics{sta_project_files/figure-latex/unnamed-chunk-20-1.pdf}
+
+\hypertarget{svm}{%
+\subsubsection{SVM}\label{svm}}
+
+Preprocessing
+
+Model
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# model 1:}
+\NormalTok{svm_model_}\DecValTok{1}\NormalTok{ <-}\StringTok{ }\KeywordTok{train}\NormalTok{(ln_early_career_pay }\OperatorTok{~}\StringTok{ }\NormalTok{.,}
+  \DataTypeTok{data =}\NormalTok{ train_data, }
+  \DataTypeTok{method =} \StringTok{"svmLinear"}\NormalTok{,}
+  \DataTypeTok{tuneGrid =}\NormalTok{ tGrid, }
+  \DataTypeTok{trControl =}\NormalTok{ tr_control, }
+  \DataTypeTok{metric =} \StringTok{"RMSE"}\NormalTok{,}
+  \DataTypeTok{preProcess =} \KeywordTok{c}\NormalTok{(}\StringTok{"center"}\NormalTok{, }\StringTok{"scale"}\NormalTok{)}
+\NormalTok{)}
+\NormalTok{svm_model_}\DecValTok{1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Support Vector Machines with Linear Kernel 
+## 
+## 391 samples
+##   5 predictor
+## 
+## Pre-processing: centered (5), scaled (5) 
+## Resampling: Cross-Validated (10 fold) 
+## Summary of sample sizes: 352, 352, 352, 351, 353, 351, ... 
+## Resampling results across tuning parameters:
+## 
+##   C     RMSE        Rsquared   MAE       
+##   0.01  0.07774523  0.7364486  0.05804287
+##   0.05  0.07692738  0.7367368  0.05746174
+##   0.10  0.07698578  0.7367897  0.05749150
+##   0.25  0.07695550  0.7367911  0.05742800
+##   0.50  0.07699114  0.7366774  0.05745745
+##   0.75  0.07701765  0.7364923  0.05746669
+##   1.00  0.07698763  0.7366353  0.05746556
+##   1.25  0.07704349  0.7365145  0.05749835
+##   1.50  0.07705455  0.7364748  0.05751070
+##   1.75  0.07705137  0.7364952  0.05750378
+##   2.00  0.07705310  0.7365205  0.05751559
+##   5.00  0.07707319  0.7363771  0.05752366
+## 
+## RMSE was used to select the optimal model using the smallest value.
+## The final value used for the model was C = 0.05.
+\end{verbatim}
+
+\includegraphics{sta_project_files/figure-latex/unnamed-chunk-23-1.pdf}
+
+\includegraphics{sta_project_files/figure-latex/unnamed-chunk-24-1.pdf}
+
+\hypertarget{lasso}{%
+\subsubsection{LASSO}\label{lasso}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{981}\NormalTok{)}
+\CommentTok{#10 fold CV}
+\NormalTok{train_control <-}\StringTok{  }\KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"cv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{)}
+\CommentTok{#Grid}
+\NormalTok{grid <-}\StringTok{ }\KeywordTok{seq}\NormalTok{(}\OperatorTok{-}\DecValTok{2}\NormalTok{,}\DecValTok{10}\NormalTok{,}\DataTypeTok{length=}\DecValTok{100}\NormalTok{)}
+
+\NormalTok{lasso_model <-}\StringTok{ }\KeywordTok{train}\NormalTok{(ln_early_career_pay }\OperatorTok{~}\StringTok{ }\NormalTok{.,}
+                     \DataTypeTok{data =}\NormalTok{ train_data, }
+                     \DataTypeTok{method =} \StringTok{"glmnet"}\NormalTok{, }
+                     \DataTypeTok{trControl =}\NormalTok{ train_control,}
+                     \DataTypeTok{metric =}  \StringTok{"Rsquared"}\NormalTok{,}
+                     \DataTypeTok{tune_Grid =} \KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{alpha =} \DecValTok{1}\NormalTok{, }\DataTypeTok{lambda =}\NormalTok{ grid))}
+\NormalTok{lasso_model}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## glmnet 
+## 
+## 391 samples
+##   5 predictor
+## 
+## No pre-processing
+## Resampling: Cross-Validated (10 fold) 
+## Summary of sample sizes: 353, 351, 353, 351, 353, 352, ... 
+## Resampling results across tuning parameters:
+## 
+##   alpha  lambda        RMSE        Rsquared   MAE       
+##   0.10   0.0001917911  0.07651221  0.7463793  0.05778304
+##   0.10   0.0019179111  0.07650888  0.7464208  0.05779062
+##   0.10   0.0191791107  0.07715067  0.7468707  0.05841034
+##   0.55   0.0001917911  0.07652939  0.7462609  0.05779879
+##   0.55   0.0019179111  0.07657131  0.7461840  0.05786946
+##   0.55   0.0191791107  0.07956271  0.7420766  0.06032027
+##   1.00   0.0001917911  0.07653376  0.7462049  0.05780614
+##   1.00   0.0019179111  0.07665041  0.7459095  0.05795561
+##   1.00   0.0191791107  0.08373134  0.7296577  0.06410784
+## 
+## Rsquared was used to select the optimal model using the largest value.
+## The final values used for the model were alpha = 0.1 and lambda = 0.01917911.
+\end{verbatim}
+
+This \textbf{Ordinary Least Squares with LASSO penalization} linear
+model contains the seven variables previously used in the linear model
+tested against the \emph{ln\_early\_career\_pay}.The best LASSO model
+has a \(alpha=0.1\) and \(lambda=0.01917911\). The highest \(R^2\) is
+0.7527662. LASSO increases the variance explained for the predictive
+model, but it also has a small penalty increasing the bias.
+
+\includegraphics{sta_project_files/figure-latex/unnamed-chunk-26-1.pdf}
+
+\includegraphics{sta_project_files/figure-latex/unnamed-chunk-27-1.pdf}
+When the \emph{test set} was used for an out of sample prediction, it is
+clear that the regression line for the Forecast versus Actual values
+presents a bettet result when compared to the simple OLS model.
+Observation fall closer to the line and the Out of Sample RMSE is
+0.62077, which does not represent a significant increase in bias, when
+compared to gain on explanatory power when the LASSO penalization was
+used.
+
+\end{document}
