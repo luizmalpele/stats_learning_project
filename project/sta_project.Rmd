@@ -136,11 +136,11 @@ histbase <- college_dataset %>%
   geom_histogram(mapping = aes(x = early_career_pay), 
                  fill = "red",
                  alpha = 0.6,
-                 bins = 50) +
+                 bins = 30) +
   geom_histogram(mapping = aes(x = mid_career_pay), 
                  fill = "blue",
                  alpha = 0.6,
-                 bins = 50) +
+                 bins = 30) +
   labs(title="Early and Mid Career Payment Distribution",
   xlab="Early and Mid Career Payment",
   ylab="Count") +
@@ -152,11 +152,11 @@ histbase2 <- college_dataset %>%
   geom_histogram(mapping = aes(x = early_career_pay), 
                  fill = "red",
                  alpha = 0.6,
-                 bins = 50) +
+                 bins = 30) +
   geom_histogram(mapping = aes(x = mid_career_pay), 
                  fill = "blue",
                  alpha = 0.6,
-                 bins = 50) +
+                 bins = 30) +
   labs(title = "Distribution for Higher Than 30% STEM Alumni",
   xlab="Early and Mid Career Payment",
   ylab="Count") +
@@ -168,11 +168,11 @@ histbase3 <- college_dataset %>%
   geom_histogram(mapping = aes(x = early_career_pay), 
                  fill = "red",
                  alpha = 0.6,
-                 bins = 50) +
+                 bins = 30) +
   geom_histogram(mapping = aes(x = mid_career_pay), 
                  fill = "blue",
                  alpha = 0.6,
-                 bins = 50) +
+                 bins = 30) +
   labs(title = "Distribution for Lower Than 30% STEM Alumni",
   xlab="Early and Mid Career Payment",
   ylab="Count") +
@@ -281,8 +281,8 @@ test_data <- college_dataset_shrinked[-inTrain , ]
 
 ```{r, echo=FALSE, results='hold'}
 #Separating the data
-sub_fit_pay <- regsubsets(ln_early_career_pay ~  ., 
-                          data = train_data)
+sub_fit_pay <- regsubsets(ln_early_career_pay ~  asian_ratio + black_ratio + women_ratio + ln_room_and_board + ln_out_of_state_tuition + stem_percent + ln_total_enrollment + private, 
+                          data = college_dataset)
 
 best_summary <- summary(sub_fit_pay)
 
@@ -347,7 +347,8 @@ We are training the model to predict _ln_early_career_pay_ on 80% of the data. T
 ```{r, message=FALSE, echo=FALSE, results='hide'}
 rf_test <- predict(rf_model, test_data)
 
-RMSE2 <- mean((rf_test - test_data$ln_early_career_pay)^2) 
+RMSE2 <- (mean((rf_test - test_data$ln_early_career_pay)^2))^0.5
+RMSE2 
 
 #Test Data
 unlog_forecast_rf <- exp(rf_test)
@@ -366,11 +367,11 @@ For brevity, the model selection results are posted below. We chose to highlight
 
 |Predictive Model |$R^2$ | In Sample RMSE | Out of Sample RMSE|
 |:----------|:---------------|:---------|:------------|
-|Ordinary Least Squares|0.7382|0.07665||
-|Ordinary Least Squares-glmnet|0.07715067|0.7468707 | |
-|Random Forest|0.7640539|0.07268202| |
-|Principal Component Analysis|0.7417742|0.07682088| |
-|Support Vector Machine|0.7367368|0.07692738| |
+|Ordinary Least Squares|0.7382|0.07665|0.08076483|
+|Ordinary Least Squares-glmnet|0.07715067|0.7468707|0.08027886|
+|Random Forest|0.7640539|0.07268202|0.0727503|
+|Principal Component Analysis|0.7417742|0.07682088|0.08076483|
+|Support Vector Machine|0.7367368|0.07692738|0.07923666|
 
 ## Other Techniques
 
@@ -403,8 +404,8 @@ ggplot(train_data, aes(x = unlog_forecast_lm, y = unlog_actual_lm),alpha = 0.6) 
 #Testing Data on Linear Model
 lm_test_data <- predict(earlypay_lm, test_data)
 
-RMSE2 <- mean((lm_test_data - test_data$ln_early_career_pay)^2) 
-
+RMSE2 <- (mean((lm_test_data - test_data$ln_early_career_pay)^2))^0.5 
+RMSE2
 
 #Test Data
 unlog_forecast_lm <- exp(lm_test_data)
@@ -452,7 +453,8 @@ ggplot(train_data, aes(x = unlog_forecast_pca, y = unlog_actual_pca), alpha = 0.
 ```{r, echo=FALSE, results='hold', message=FALSE}
 pca_test_data <- predict(glm_pca_model, test_data)
 
-RMSE2 <- mean((pca_test_data - test_data$ln_early_career_pay)^2) 
+RMSE2 <- (mean((pca_test_data - test_data$ln_early_career_pay)^2))^0.5
+RMSE2
 
 #Test Data
 unlog_forecast_pca <- exp(pca_test_data)
@@ -513,8 +515,8 @@ For this model of SVM, we see that out of all the models, this has more concentr
 ```{r, echo=FALSE, results='hold', message=FALSE}
 svm_test_data <- predict(svm_model_1, test_data)
 
-RMSE2 <- mean((svm_test_data - test_data$ln_early_career_pay)^2) 
-
+RMSE2 <- (mean((svm_test_data - test_data$ln_early_career_pay)^2))^0.5
+RMSE2
 #Test Data
 unlog_forecast_svm <- exp(svm_test_data)
 
@@ -566,8 +568,8 @@ ggplot(train_data, aes(x = unlog_forecast_lasso, y = unlog_actual_lasso),alpha =
 ```{r, echo=FALSE, results='hold', message=FALSE}
 test_lasso <- predict(lasso_model, test_data)
 
-RMSE2 <- mean((test_lasso - test_data$ln_early_career_pay)^2) 
-
+RMSE2 <- (mean((test_lasso - test_data$ln_early_career_pay)^2))^0.5
+RMSE2
 #Test Data
 unlog_forecast_lasso <- exp(test_lasso)
 
