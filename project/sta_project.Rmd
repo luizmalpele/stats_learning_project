@@ -1,15 +1,21 @@
 ---
-title: "R Notebook"
+title: "Final Project"
+subtitle: STA3241.01 -- April 27, 2020
+author: Luiz Gustavo Fagundes Malpele, Cindy Nguyen, Isabel Zimmerman
 output:
-  pdf_document:
-    toc: yes
   html_document:
     theme: united
     toc: yes
     toc_float: yes
+  pdf_document:
+    toc: yes
+  word_document:
+    toc: yes
 ---
+# Introduction
+The aim of this report was to predict early and mid career pay for college graduates from data collected on independent variables such as: tuition costs, school enrollment size, percentage STEM of majors, percentage of minority students, etc. After a robust exploratory data analysis, various regression algorithms were created utilizing the libraries `tidyverse`, `caret`, `DataExplorer`, `fastDummies`, `leaps`, `cowplot`, and `GGally`. All of the R code can be found at the GitHub [here](https://github.com/luizmalpele/stats_learning_project/).
 
-```{r}
+```{r, echo = FALSE, warning=FALSE, message= FALSE}
 library(tidyverse)
 library(caret)
 library(DataExplorer)
@@ -18,70 +24,22 @@ library(leaps)
 library(cowplot)
 library(GGally)
 ```
-### Dataset
-Import processed data, which can be found [here] ("https://github.com/luizmalpele/stats_learning_project/blob/master/data/data.Rmd")
 
-```{r}
+# Dataset
+We began by importing processed data from TidyTuesday, which can also be found [here](https://github.com/luizmalpele/stats_learning_project/blob/master/data/data.Rmd).
+
+From this data, we transformed all minority variables into percentages of total enrollment, and took the log of the following variables: early career pay, mid career pay, in state tuition, out of state tuition, room and board, and total enrollment. This was to create more normal distributions in the data and possibly remove heteroscedasticity. With the addition of these two features in the data, some of the models (particularly linear models) may improve in predictive power.
+
+```{r, echo = FALSE}
 #read preprocessed data
 college_data <- read.csv(file = '../data/college_data.csv')
 ```
 
-View data info
-```{r}
+```{r, echo = FALSE, message=FALSE}
 glimpse(college_data)
 ```
 
-Use DataExplorer to automatically create an EDA
-```{r}
-#create_report(college_data)
-```
-
-EDA etc
-
-```{r}
-#overlay early pay distribution with middle play distribution
-college_data %>% 
-  ggplot() +
-  geom_histogram(mapping = aes(x = early_career_pay), 
-                 fill = "red",
-                 alpha = 0.6) +
-  geom_histogram(mapping = aes(x = mid_career_pay), 
-                 fill = "blue",
-                 alpha = 0.6) +
-  xlab("Pay") +
-  ylab("Count") +
-  theme_minimal()
-```
-
-What types of colleges want to make the world better?
-  (maybe subset grep(Art, creative) and grep(health, nursing) and compare boxplots of 'make_world_better_percent')
-```{r}
-college_data %>% 
-  filter(!is.na(make_world_better_percent)) %>% 
-  select(name, make_world_better_percent) %>% 
-  arrange(make_world_better_percent)
-```
-
-
-Useful for EDA:
--make a correlation matrix
-
-Questions these models hope to answer
--Does the aspiration of making the world better have an impact on the mid career payment?
-  -How does it affect the early stage of a students career?
-  -Does it apply to only some specific fields?
-
--Are more diverse schools likely to have a higher % of alumni who want to change the world?
-
--Do lower tuition and fees cause people to want to care more about the world?
-
-Translate these questions into statistical models:
-What variables most impacts mid level pay? (LASSO or PCA + linear regression)
-
-
-
-
-```{r}
+```{r, echo = FALSE}
 college_dataset <-  college_data %>% 
   dummy_cols(select_columns = "degree_length") %>% 
   dummy_cols(select_columns = "type") %>% 
@@ -108,40 +66,122 @@ college_dataset <-  college_data %>%
          ln_out_of_state_tuition=log(out_of_state_tuition),
          ln_out_of_state_total=log(out_of_state_total),
          ln_room_and_board=log(room_and_board),
+         ln_total_enrollment = log(total_enrollment),
          tuition_ratio=out_of_state_tuition/in_state_tuition,
          tuition_total_ratio=out_of_state_total/in_state_total)
 college_dataset <- na.omit(college_dataset)
-college_dataset
-```
-
-```{r}
-college_dataset_analysis <- college_dataset %>%
-  select(-state, -type, -degree_length, -early_career_pay, -mid_career_pay, ln_mid_career_pay)
-college_dataset_analysis
 ```
 
 
-- Colleges for Profit did not collected data on "Make World Better".
+## Data Dictionary
 
+|Field Name | Description | Data Type | Number of Observations|
+|:----------|:---------------|:---------|:------------|
+|name|Institution Name|factor|486|
+|state_code|State Abbreviation|factor|486|
+|make_world_better_percent|Percent of alumni who think they are making the world a better place|integer|486|
+|room_and_board|Room and board in USD|integer|486|
+|ln_room_and_board|Natural Log of Room and board in U$D|double|486|
+|early_career_pay|Estimated early career pay in USD|int|486|
+|ln_early_career_pay|Natural log of estimated early career pay in USD|double|486|
+|mid_career_pay|Estimated mid career pay in USD|int|486|
+|ln_mid_career_pay|Natural log of estimated mid career pay in USD|double|486|
+|total_enrollment|Total enrollment of students|double|486|
+|ln_total_enrollment|Natural Log of Total enrollment of students|double|486|
+|out_of_state_tuition|Tuition for out-of-state residents in USD|integer|486|
+|ln_out_of_state_tuition|Natural Log of Tuition for out-of-state residents in USD|double|486|
+|in_of_state_tuition|Tuition for in-of-state residents in USD|integer|486|
+|ln_in_of_state_tuition|Natural Log of Tuition for in-of-state residents in USD|double|486|
+|stem_percent|Percent of student body in STEM|double|486|
+|private|Type: 0 for Public, 1 for Private|integer|486|
+|asian_ratio|Percentage of Asian Students|double|486|
+|black_ratio|Percentage of Black Students|double|486|
+|minority_ratio|Percentage of all Minorities Combined|double|486|
+|hispanic_ratio|Percentage of Hispanic Students|double|486|
+|women_ratio|Percentage of Women Students|double|486|
+|tuition_ratio|Out-of-State Tuition and In-State Tuition Ratio|double|486|
+
+
+## Exploratory Data Analysis
+
+The first step was to use the `DataExplorer` package to automatically create an EDA. This report can be found [here](https://github.com/luizmalpele/stats_learning_project/blob/master/project/EDA_report.html). Using this process was preferred as it automatically created all the univariate distributions and correlation matricies for the variables. This way, we were able to focus on creating more complex explorations that were fine-tuned to the question we wanted to answer.
 ```{r}
 #create_report(college_dataset)
 ```
 
-```{r}
+The first look into the data was to see how the distribution of pay shifted from early to mid career. We could tell that the distribution became wider and right-skewed for mid career pay and was higher on average; the mean early pay was $51,000 whereas the mid career pay average was $92,000.
+```{r, message = FALSE}
 college_dataset %>% 
   ggplot() +
   geom_histogram(mapping = aes(x = early_career_pay), 
                  fill = "red",
-                 alpha = 0.6) +
+                 alpha = 0.6,
+                 bins = 50) +
   geom_histogram(mapping = aes(x = mid_career_pay), 
                  fill = "blue",
-                 alpha = 0.6) +
+                 alpha = 0.6,
+                 bins = 50) +
   xlab("Pay") +
   ylab("Count") +
   theme_minimal()
+mean(college_dataset$early_career_pay)
+mean(college_dataset$mid_career_pay)
 ```
 
 
+```{r, warning=FALSE, echo=FALSE, results='hold'}
+#overlay early pay distribution with middle play distribution
+histbase <- college_dataset %>% 
+  ggplot() +
+  geom_histogram(mapping = aes(x = early_career_pay), 
+                 fill = "red",
+                 alpha = 0.6,
+                 bins = 50) +
+  geom_histogram(mapping = aes(x = mid_career_pay), 
+                 fill = "blue",
+                 alpha = 0.6,
+                 bins = 50) +
+  labs(title="Early and Mid Career Payment Distribution",
+  xlab="Early and Mid Career Payment",
+  ylab="Count") +
+  theme_minimal()
+
+histbase2 <- college_dataset %>% 
+  filter(stem_percent>=30) %>% 
+  ggplot() +
+  geom_histogram(mapping = aes(x = early_career_pay), 
+                 fill = "red",
+                 alpha = 0.6,
+                 bins = 50) +
+  geom_histogram(mapping = aes(x = mid_career_pay), 
+                 fill = "blue",
+                 alpha = 0.6,
+                 bins = 50) +
+  labs(title = "Distribution for Higher Than 30% STEM Alumni",
+  xlab="Early and Mid Career Payment",
+  ylab="Count") +
+  theme_minimal()
+
+histbase3 <- college_dataset %>% 
+  filter(stem_percent<30) %>% 
+  ggplot() +
+  geom_histogram(mapping = aes(x = early_career_pay), 
+                 fill = "red",
+                 alpha = 0.6,
+                 bins = 50) +
+  geom_histogram(mapping = aes(x = mid_career_pay), 
+                 fill = "blue",
+                 alpha = 0.6,
+                 bins = 50) +
+  labs(title = "Distribution for Lower Than 30% STEM Alumni",
+  xlab="Early and Mid Career Payment",
+  ylab="Count") +
+  theme_minimal()
+
+plot_grid(histbase, histbase2, histbase3, labels = "AUTO", nrow = c(3,1))
+```
+
+After inspecting these graphs, we decided to make a more parsimonious dataset in order to only train models on relevant variables 
 ```{r}
 college_dataset_shrinked <- college_dataset %>% 
   select(ln_early_career_pay,
@@ -151,49 +191,13 @@ college_dataset_shrinked <- college_dataset %>%
          ln_room_and_board,
          private,
          black_ratio,
-         rank,
-         women_ratio)
-
-college_dataset_shrinked2 <- college_dataset %>% 
-    select(ln_early_career_pay,
-         asian_ratio,  
-         ln_out_of_state_tuition,
-         stem_percent, 
-         ln_room_and_board,
-         private,
-         black_ratio,
-         rank,
+         ln_total_enrollment,
          women_ratio)
 ```
 
-```{r}
-ggpairs(data = college_dataset_shrinked, lower = list(continuous = wrap("smooth", alpha = 0.3, size=0.1)))
-```
 
-```{r}
-ggpairs(data = college_dataset_shrinked2, lower = list(continuous = wrap("smooth", alpha = 0.3, size=0.1)))
-```
-
-```{r}
-college_dataset %>% 
-  ggplot() + 
-  geom_point(aes(x=ln_out_of_state_total, y=make_world_better_percent, color = type), alpha = 0.6) + 
-  labs(
-    title = "Log of Out of State Total versus Percentage of Students seeking a Better World ", 
-    x = "Log of Out of State Total", 
-    y = "Percentage Students seeking a Better World", 
-    color = "Type of Institution") + scale_color_brewer(palette = "Set1")
-```
-
-```{r}
-college_dataset %>% 
-  ggplot() + 
-  geom_point(aes(x=ln_out_of_state_total, y=ln_early_career_pay, color = type), alpha = 0.6) + 
-  labs(
-    title = "Log of Out of State Total versus Percentage of Students seeking a Better World ", 
-    x = "Log of Out of State Total", 
-    y = "Percentage Students seeking a Better World", 
-    color = "Type of Institution") + scale_color_brewer(palette = "Set1")
+```{r, message=FALSE}
+ggpairs(data = college_dataset_shrinked, lower = list(continuous = wrap("smooth", alpha = 0.3, size=0.01)))
 ```
 
 Separating the data into Train and Test
@@ -201,9 +205,11 @@ Separating the data into Train and Test
 ```{r}
 set.seed(123)
 train_control <-  trainControl(method = "cv", number = 10)
-inTrain <- createDataPartition(y = college_dataset_analysis$ln_early_career_pay, p = 0.8, list = FALSE)
-train_set <- college_dataset_analysis[inTrain , ]
-test_set <- college_dataset_analysis[-inTrain , ]
+
+inTrain <- createDataPartition(y = college_dataset_shrinked$ln_early_career_pay, p = 0.8, list = FALSE)
+
+train_data <- college_dataset_shrinked[inTrain , ]
+test_data <- college_dataset_shrinked[-inTrain , ]
 ```
 
   This command separates 80% of the data into a training set, and other 20% into a testing set. This is done to avoid overfitting and it is preferable to perform the final model selection with an out of sample criterion.
@@ -219,9 +225,9 @@ sub_fit_pay <- regsubsets(ln_early_career_pay ~
                             ln_room_and_board + 
                             private +
                             black_ratio + 
-                            rank + 
+                            ln_total_enrollment + 
                             women_ratio, 
-                          data = train_set)
+                          data = train_data)
 
 best_summary <- summary(sub_fit_pay)
 
@@ -237,29 +243,55 @@ plot(best_summary$adjr2, xlab = "Number of features", ylab = "Adjusted-R^2", mai
 plot(best_summary$bic, xlab = "Number of features", ylab = "BIC", main = "Optimal Number of Predictors", col = "dark red", type = "b")
 ```
 
- Based on BIC, Mallows' CP, and the $Adjusted-R^2$, the select model will account for 6 predictors, more than this will result in overfitting and these variables will be: __stem_percent, room_and_board, ln_out_of_state_tuition, rank, women_ratio, black_ratio, and asian_ratio__. 
+ Based on BIC, Mallows' CP, and the $Adjusted-R^2$, the select model will account for 6 predictors, more than this will result in overfitting and these variables will be: __stem_percent, room_and_board, ln_out_of_state_tuition, ln_total_enrollment, women_ratio, black_ratio, and asian_ratio__. 
  
 # Modeling With other Techniques
-```{r}
-set.seed(123)
-train_control <-  trainControl(method = "cv", number = 10)
-inTrain <- createDataPartition(y = college_dataset_shrinked2$ln_early_career_pay, p = 0.8, list = FALSE)
-iz_train_set <- college_dataset_shrinked2[inTrain ,]
-iz_test_set <- college_dataset_shrinked2[-inTrain ,]
 
-```
 
 ## PCA
 This gives an R^2 value of 0.96 but NO IDEA HOW
 ```{r}
 glm_pca_model <- train(ln_early_career_pay ~ . , 
-                 data = iz_train_set, 
+                 data = train_data, 
                  method = "glm", 
                  preProcess = "pca", 
                  trControl = train_control)
 glm_pca_model
 ```
 
+
+
+```{r, message=FALSE}
+#Training Data for PCA
+pca_train_data <- predict(glm_pca_model)
+
+unlog_forecast_pca <- exp(pca_train_data)
+
+unlog_actual_pca <- exp(train_data$ln_early_career_pay)
+
+ggplot(train_data, aes(x = unlog_forecast_pca, y = unlog_actual_pca),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") +  
+  labs(title = "Forecast versus Actual - PCA (Train Data)", x = "Forecast", y = "Actual")
+```
+
+```{r, message=FALSE}
+pca_test_data <- predict(glm_pca_model, test_data)
+
+RMSE2 <- mean((pca_test_data - test_data$ln_early_career_pay)^2) 
+
+RMSE2
+
+#Test Data
+unlog_forecast_pca <- exp(pca_test_data)
+
+unlog_actual_pca <- exp(test_data$ln_early_career_pay)
+
+ggplot(test_data, aes(x = unlog_forecast_pca, y = unlog_actual_pca),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") + 
+  labs(title = "Forecast versus Actual - PCA (Test Data)", x = "Forecast", y = "Actual")
+```
 
 
 ## Simple Linear Regression
@@ -270,10 +302,43 @@ earlypay_lm <- lm(ln_early_career_pay ~  asian_ratio +
                     stem_percent + 
                     ln_room_and_board + 
                     black_ratio + 
-                    rank + 
+                    ln_total_enrollment + 
                     women_ratio, 
-                  data = train_set)
+                  data = train_data)
 summary(earlypay_lm)
+```
+
+```{r, message=FALSE}
+#Training Data for Linear Model
+lm_ep_train_data <- predict(earlypay_lm)
+
+unlog_forecast_lm <- exp(lm_ep_train_data)
+
+unlog_actual_lm <- exp(train_data$ln_early_career_pay)
+
+ggplot(train_data, aes(x = unlog_forecast_lm, y = unlog_actual_lm),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") +  
+  labs(title = "Forecast versus Actual - Linear Model (Train Data)", x = "Forecast", y = "Actual")
+```
+
+```{r, message=FALSE}
+#Testing Data on Linear Model
+lm_test_data <- predict(earlypay_lm, test_data)
+
+RMSE2 <- mean((lm_test_data - test_data$ln_early_career_pay)^2) 
+
+RMSE2
+
+#Test Data
+unlog_forecast_lm <- exp(lm_test_data)
+
+unlog_actual_lm <- exp(test_data$ln_early_career_pay)
+
+ggplot(test_data, aes(x = unlog_forecast_lm, y = unlog_actual_lm),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") + 
+  labs(title = "Forecast versus Actual - Linear Model (Test Data)", x = "Forecast", y = "Actual")
 ```
 
 ## Random Forest
@@ -284,13 +349,45 @@ cv_5 <- trainControl(method = "cv", number = 5)
 rf_grid <- expand.grid(mtry = 1:10)
 
 set.seed(825)
-rf_model <- train(ln_early_career_pay ~ ., data = iz_train_set,
+rf_model <- train(ln_early_career_pay ~ ., data = train_data,
                      method = "rf",
                      trControl = oob,
                      verbose = FALSE,
                      tuneGrid = rf_grid)
 # print results
 rf_model
+```
+
+```{r, message=FALSE}
+#Training Data for Random Forest
+random_forest_data <- predict(rf_model)
+
+unlog_forecast_rf <- exp(random_forest_data)
+
+unlog_actual_rf <- exp(train_data$ln_early_career_pay)
+
+ggplot(train_data, aes(x = unlog_forecast_rf, y = unlog_actual_rf),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") +  
+  labs(title = "Forecast versus Actual - Random Forest (Train Data)", x = "Forecast", y = "Actual")
+```
+
+```{r, message=FALSE}
+rf_test <- predict(rf_model, test_data)
+
+RMSE2 <- mean((rf_test - test_data$ln_early_career_pay)^2) 
+
+RMSE2
+
+#Test Data
+unlog_forecast_rf <- exp(rf_test)
+
+unlog_actual_rf <- exp(test_data$ln_early_career_pay)
+
+ggplot(test_data, aes(x = unlog_forecast_rf, y = unlog_actual_rf),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") + 
+  labs(title = "Forecast versus Actual - Random Forest (Test Data)", x = "Forecast", y = "Actual")
 ```
 
 ```{r}
@@ -305,11 +402,6 @@ Preprocessing
 set.seed(123)
 college_dataset_shrinked <- na.omit(college_dataset_shrinked)
 
-#Creating trainging and testing data
-inTrain <- createDataPartition(y = college_dataset_shrinked$ln_early_career_pay , p = 0.8, list = FALSE)
-
-train_data <- college_dataset_shrinked[inTrain,]
-test_data <- college_dataset_shrinked[-inTrain,]
 
 #train control 
 tr_control <- trainControl(method = "cv", number = 10)
@@ -332,4 +424,136 @@ svm_model_1 <- train(ln_early_career_pay ~ .,
 svm_model_1
 ```
 
+```{r, message=FALSE}
+#Training Data
+svm_train_data <- predict(svm_model_1)
+
+unlog_forecast_svm <- exp(svm_train_data)
+
+unlog_actual_svm <- exp(train_data$ln_early_career_pay)
+
+ggplot(train_data, aes(x = unlog_forecast_svm, y = unlog_actual_svm),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") +  
+  labs(title = "Forecast versus Actual - SVM (Train Data)", x = "Forecast", y = "Actual")
+```
+
+```{r, message=FALSE}
+svm_test_data <- predict(svm_model_1, test_data)
+
+RMSE2 <- mean((svm_test_data - test_data$ln_early_career_pay)^2) 
+
+RMSE2
+
+#Test Data
+unlog_forecast_svm <- exp(svm_test_data)
+
+unlog_actual_svm <- exp(test_data$ln_early_career_pay)
+
+ggplot(test_data, aes(x = unlog_forecast_svm, y = unlog_actual_svm),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") + 
+  labs(title = "Forecast versus Actual - SVM (Test Data)", x = "Forecast", y = "Actual")
+```
+
+
+
+#LASSO
+
+```{r}
+set.seed(981)
+#10 fold CV
+train_control <-  trainControl(method = "cv", number = 10)
+#Grid
+grid <- seq(-2,10,length=100)
+
+lasso_model <- train(ln_early_career_pay ~ .,
+                     data = train_data, 
+                     method = "glmnet", 
+                     trControl = train_control,
+                     metric =  "Rsquared",
+                     tune_Grid = expand.grid(alpha = 1, lambda = grid))
+lasso_model
+```
+
+```{r}
+#Training Data
+lasso_train_data <- predict(lasso_model)
+
+unlog_forecast_lasso <- exp(lasso_train_data)
+
+unlog_actual_lasso <- exp(train_data$ln_early_career_pay)
+
+ggplot(train_data, aes(x = unlog_forecast_lasso, y = unlog_actual_lasso),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") +  
+  labs(title = "Forecast versus Actual - LASSO (Train Data)", x = "Forecast", y = "Actual")
+```
+
+
+```{r}
+test_lasso <- predict(lasso_model, test_data)
+
+RMSE2 <- mean((test_lasso - test_data$ln_early_career_pay)^2) 
+
+RMSE2
+
+#Test Data
+unlog_forecast_lasso <- exp(test_lasso)
+
+unlog_actual_lasso <- exp(test_data$ln_early_career_pay)
+
+ggplot(test_data, aes(x = unlog_forecast_lasso, y = unlog_actual_lasso),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") + 
+  labs(title = "Forecast versus Actual - LASSO (Test Data)", x = "Forecast", y = "Actual")
+```
+
+## Ridge Regression
+ 
+```{r}
+set.seed(981)
+ridge_model <- train(ln_early_career_pay ~ .,
+                     data = train_data, 
+                     method = "glmnet", 
+                     trControl = train_control,
+                     metric =  "Rsquared",
+                     tune_Grid = expand.grid(alpha = 0, lambda = grid))
+
+ridge_model
+```
+
+```{r, message=FALSE}
+#Training Data
+ridge_train_data <- predict(ridge_model)
+
+unlog_forecast_ridge <- exp(ridge_train_data)
+
+unlog_actual <- exp(train_data$ln_early_career_pay)
+
+ggplot(train_data, aes(x = unlog_forecast_ridge, y = unlog_actual),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") +  
+  labs(title = "Forecast versus Actuals - Ridge (Train Data)", x = "Forecast", y = "Actual")
+```
+
+
+
+```{r, message=FALSE}
+test_ridge_data <- predict(ridge_model, test_data)
+
+RMSE2 <- mean((test_ridge_data - test_data$ln_early_career_pay)^2) 
+
+RMSE2
+
+#Test Data
+unlog_forecast_ridge <- exp(test_ridge_data)
+
+unlog_actual_ridge <- exp(test_data$ln_early_career_pay)
+
+ggplot(test_data, aes(x = unlog_forecast_ridge, y = unlog_actual_ridge),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") + 
+  labs(title = "Forecast versus Actual - Ridge (Test Data)", x = "Forecast", y = "Actual")
+```
 
