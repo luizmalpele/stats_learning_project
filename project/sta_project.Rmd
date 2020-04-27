@@ -107,10 +107,19 @@ college_dataset <-  college_data %>%
          ln_in_state_total=log(in_state_total),
          ln_out_of_state_tuition=log(out_of_state_tuition),
          ln_out_of_state_total=log(out_of_state_total),
-         ln_room_and_board=log(room_and_board))
+         ln_room_and_board=log(room_and_board),
+         tuition_ratio=out_of_state_tuition/in_state_tuition,
+         tuition_total_ratio=out_of_state_total/in_state_total)
 college_dataset <- na.omit(college_dataset)
 college_dataset
 ```
+
+```{r}
+college_dataset_analysis <- college_dataset %>%
+  select(-state, -type, -degree_length, -early_career_pay, -mid_career_pay, ln_mid_career_pay)
+college_dataset_analysis
+```
+
 
 - Colleges for Profit did not collected data on "Make World Better".
 
@@ -135,23 +144,26 @@ college_dataset %>%
 
 ```{r}
 college_dataset_shrinked <- college_dataset %>% 
-  select(ln_early_career_pay, 
-         ln_mid_career_pay, 
-         make_world_better_percent,
-         minority_ratio, 
-         ln_out_of_state_total, 
-         ln_in_state_total, 
-         stem_percent)
+  select(ln_early_career_pay,
+         asian_ratio,  
+         ln_out_of_state_tuition,
+         stem_percent, 
+         ln_room_and_board,
+         private,
+         black_ratio,
+         rank,
+         women_ratio)
 
 college_dataset_shrinked2 <- college_dataset %>% 
-  select(ln_early_career_pay, 
-         ln_mid_career_pay, 
-         make_world_better_percent, 
-         minority_ratio, 
-         hispanic_ratio, 
-         asian_ratio, 
-         black_ratio, 
-         white_ratio)
+    select(ln_early_career_pay,
+         asian_ratio,  
+         ln_out_of_state_tuition,
+         stem_percent, 
+         ln_room_and_board,
+         private,
+         black_ratio,
+         rank,
+         women_ratio)
 ```
 
 ```{r}
@@ -189,9 +201,9 @@ Separating the data into Train and Test
 ```{r}
 set.seed(123)
 train_control <-  trainControl(method = "cv", number = 10)
-inTrain <- createDataPartition(y = college_dataset$ln_early_career_pay, p = 0.8, list = FALSE)
-train_set <- college_dataset[inTrain , ]
-test_set <- college_dataset[-inTrain , ]
+inTrain <- createDataPartition(y = college_dataset_analysis$ln_early_career_pay, p = 0.8, list = FALSE)
+train_set <- college_dataset_analysis[inTrain , ]
+test_set <- college_dataset_analysis[-inTrain , ]
 ```
 
   This command separates 80% of the data into a training set, and other 20% into a testing set. This is done to avoid overfitting and it is preferable to perform the final model selection with an out of sample criterion.
@@ -207,7 +219,8 @@ sub_fit_pay <- regsubsets(ln_early_career_pay ~
                             ln_room_and_board + 
                             private +
                             black_ratio + 
-                            rank + women_ratio, 
+                            rank + 
+                            women_ratio, 
                           data = train_set)
 
 best_summary <- summary(sub_fit_pay)
