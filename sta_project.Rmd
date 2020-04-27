@@ -1,0 +1,549 @@
+---
+title: "Final Project"
+subtitle: STA3241.01 -- April 27, 2020
+author: Luiz Gustavo Fagundes Malpele, Cindy Nguyen, Isabel Zimmerman
+output:
+  word_document:
+    toc: yes
+  pdf_document:
+    toc: yes
+  html_document:
+    theme: united
+    toc: yes
+    toc_float: yes
+---
+# Introduction
+The aim of this report was to predict early and mid career pay for college graduates from data collected on independent variables such as: tuition costs, school enrollment size, percentage STEM of majors, percentage of minority students, etc. After a robust exploratory data analysis, various regression algorithms were created utilizing the libraries `tidyverse`, `caret`, `DataExplorer`, `fastDummies`, `leaps`, `cowplot`, and `GGally`. All of the R code can be found at the GitHub [here](https://github.com/luizmalpele/stats_learning_project/).
+
+```{r, echo = FALSE, warning=FALSE, message= FALSE}
+library(tidyverse)
+library(caret)
+library(DataExplorer)
+library(fastDummies)
+library(leaps)
+library(cowplot)
+library(GGally)
+```
+
+# Dataset
+We began by importing processed data from TidyTuesday, which can also be found [here](https://github.com/luizmalpele/stats_learning_project/blob/master/data/data.Rmd).
+
+From this data, we transformed all minority variables into percentages of total enrollment, and took the log of the following variables: early career pay, mid career pay, in state tuition, out of state tuition, room and board, and total enrollment. This was to create more normal distributions in the data and possibly remove heteroscedasticity. With the addition of these two features in the data, some of the models (particularly linear models) may improve in predictive power.
+
+```{r, echo = FALSE}
+#read preprocessed data
+college_data <- read.csv(file = '../data/college_data.csv')
+```
+
+```{r, echo = FALSE, message=FALSE}
+#glimpse(college_data)
+```
+
+```{r, echo = FALSE}
+college_dataset <-  college_data %>% 
+  dummy_cols(select_columns = "degree_length") %>% 
+  dummy_cols(select_columns = "type") %>% 
+  rename(length_2y="degree_length_2 Year", 
+         length_4y="degree_length_4 Year", 
+         for_profit="type_For Profit", 
+         private="type_Private", 
+         public = "type_Public") %>% 
+  select(-degree_length_Other, -type_Other) %>%  
+  filter(!is.na(make_world_better_percent)) %>% 
+  filter(!is.na(total_enrollment)) %>% 
+  mutate(women_ratio=round(women/total_enrollment*100, 2),
+         native_american_ratio=round(native_american/total_enrollment*100, 2),
+         asian_ratio=round(asian/total_enrollment*100, 2),
+         black_ratio=round(black/total_enrollment*100, 2),
+         hispanic_ratio=round(hispanic/total_enrollment*100, 2),
+         pacific_islander_ratio=round(pacific_islander/total_enrollment*100, 2),
+         white_ratio=round(white/total_enrollment*100, 2),
+         minority_ratio=round(total_minority/total_enrollment*100, 2)) %>% 
+  mutate(ln_early_career_pay=log(early_career_pay),
+         ln_mid_career_pay=log(mid_career_pay),
+         ln_in_state_tuition=log(in_state_tuition),
+         ln_in_state_total=log(in_state_total),
+         ln_out_of_state_tuition=log(out_of_state_tuition),
+         ln_out_of_state_total=log(out_of_state_total),
+         ln_room_and_board=log(room_and_board),
+         ln_total_enrollment = log(total_enrollment),
+         tuition_ratio=out_of_state_tuition/in_state_tuition,
+         tuition_total_ratio=out_of_state_total/in_state_total)
+college_dataset <- na.omit(college_dataset)
+```
+
+
+## Data Dictionary
+
+|Field Name | Description | Data Type | Number of Observations|
+|:----------|:---------------|:---------|:------------|
+|name|Institution Name|factor|486|
+|state_code|State Abbreviation|factor|486|
+|make_world_better_percent|Percent of alumni who think they are making the world a better place|integer|486|
+|room_and_board|Room and board in USD|integer|486|
+|ln_room_and_board|Natural Log of Room and board in U$D|double|486|
+|early_career_pay|Estimated early career pay in USD|int|486|
+|ln_early_career_pay|Natural log of estimated early career pay in USD|double|486|
+|mid_career_pay|Estimated mid career pay in USD|int|486|
+|ln_mid_career_pay|Natural log of estimated mid career pay in USD|double|486|
+|total_enrollment|Total enrollment of students|double|486|
+|ln_total_enrollment|Natural Log of Total enrollment of students|double|486|
+|out_of_state_tuition|Tuition for out-of-state residents in USD|integer|486|
+|ln_out_of_state_tuition|Natural Log of Tuition for out-of-state residents in USD|double|486|
+|in_of_state_tuition|Tuition for in-of-state residents in USD|integer|486|
+|ln_in_of_state_tuition|Natural Log of Tuition for in-of-state residents in USD|double|486|
+|stem_percent|Percent of student body in STEM|double|486|
+|private|Type: 0 for Public, 1 for Private|integer|486|
+|asian_ratio|Percentage of Asian Students|double|486|
+|black_ratio|Percentage of Black Students|double|486|
+|minority_ratio|Percentage of all Minorities Combined|double|486|
+|hispanic_ratio|Percentage of Hispanic Students|double|486|
+|women_ratio|Percentage of Women Students|double|486|
+|tuition_ratio|Out-of-State Tuition and In-State Tuition Ratio|double|486|
+
+
+## Exploratory Data Analysis
+
+The first step was to use the `DataExplorer` package to automatically create an EDA. This report can be found [here](https://github.com/luizmalpele/stats_learning_project/blob/master/project/EDA_report.html). Using this process was preferred as it automatically created all the univariate distributions and correlation matricies for the variables. This way, we were able to focus on creating more complex explorations that were fine-tuned to the question we wanted to answer.
+```{r}
+#create_report(college_dataset)
+```
+
+The first look into the data was to see how the distribution of pay shifted from early to mid career. We could tell that the distribution became wider and right-skewed for mid career pay and was higher on average; the mean early pay was $51,000 whereas the mid career pay average was $92,000.
+```{r, echo=FALSE, message = FALSE, results='hold'}
+college_dataset %>% 
+  ggplot() +
+  geom_histogram(mapping = aes(x = early_career_pay), 
+                 fill = "red",
+                 alpha = 0.6,
+                 bins = 50) +
+  geom_histogram(mapping = aes(x = mid_career_pay), 
+                 fill = "blue",
+                 alpha = 0.6,
+                 bins = 50) +
+  xlab("Pay") +
+  ylab("Count") +
+  theme_minimal()
+#mean(college_dataset$early_career_pay)
+#mean(college_dataset$mid_career_pay)
+```
+
+We next wanted to understand more thoroughly the impact of variables we thought would be higly significant in our regression models. The first variable we chose to explore was _stem_percent_ as STEM majors tend to have higher paid jobs both right out of college and over time. In Figure A, it is observed that both early and mid career pay has relatively normal distributions. However, when observing schools with higher than 30% STEM majors in Figure B, there is no longer a normal distribution; both early and mid career pay are observed to be proportionally hight, but do note that the sample size is much smaller for this visualization. Finally, we see that the less than 30% STEM majors has a relatively similar distribution as the school totals; that is, this distribution is fairly normal.
+```{r, warning=FALSE, echo=FALSE, results='hold'}
+#overlay early pay distribution with middle play distribution
+histbase <- college_dataset %>% 
+  ggplot() +
+  geom_histogram(mapping = aes(x = early_career_pay), 
+                 fill = "red",
+                 alpha = 0.6,
+                 bins = 30) +
+  geom_histogram(mapping = aes(x = mid_career_pay), 
+                 fill = "blue",
+                 alpha = 0.6,
+                 bins = 30) +
+  labs(title="Early and Mid Career Payment Distribution",
+  xlab="Early and Mid Career Payment",
+  ylab="Count") +
+  theme_minimal()
+
+histbase2 <- college_dataset %>% 
+  filter(stem_percent>=30) %>% 
+  ggplot() +
+  geom_histogram(mapping = aes(x = early_career_pay), 
+                 fill = "red",
+                 alpha = 0.6,
+                 bins = 30) +
+  geom_histogram(mapping = aes(x = mid_career_pay), 
+                 fill = "blue",
+                 alpha = 0.6,
+                 bins = 30) +
+  labs(title = "Distribution for Higher Than 30% STEM Alumni",
+  xlab="Early and Mid Career Payment",
+  ylab="Count") +
+  theme_minimal()
+
+histbase3 <- college_dataset %>% 
+  filter(stem_percent<30) %>% 
+  ggplot() +
+  geom_histogram(mapping = aes(x = early_career_pay), 
+                 fill = "red",
+                 alpha = 0.6,
+                 bins = 30) +
+  geom_histogram(mapping = aes(x = mid_career_pay), 
+                 fill = "blue",
+                 alpha = 0.6,
+                 bins = 30) +
+  labs(title = "Distribution for Lower Than 30% STEM Alumni",
+  xlab="Early and Mid Career Payment",
+  ylab="Count") +
+  theme_minimal()
+
+plot_grid(histbase, histbase2, histbase3, labels = "AUTO", nrow = c(3,1))
+```
+
+```{r, message=FALSE, results='hide', echo=FALSE}
+point1 <- college_dataset %>% 
+  ggplot() + 
+  geom_point(aes(x=ln_out_of_state_tuition, y=ln_early_career_pay, color = type), alpha = 0.6) + 
+  labs(
+    title = "Out-of-State Tuition Vs Early C. Pay", 
+    x = "Ln of Out of State Tuition", 
+    y = "Ln of Early Career Pay", 
+    color = "Institution") + scale_color_brewer(palette = "Set1")
+
+point2 <- college_dataset %>% 
+  ggplot() + 
+  geom_point(aes(x=ln_total_enrollment, y=ln_early_career_pay, color = type), alpha = 0.6) + 
+  labs(
+    title = "Total Enrollment Vs Early C. Pay", 
+    x = "Ln of Total Enrollment", 
+    y = "Ln of Early Career Pay", 
+    color = "Institution") + scale_color_brewer(palette = "Set1")
+
+point3 <- college_dataset %>% 
+  ggplot() + 
+  geom_point(aes(x=asian_ratio, y=ln_early_career_pay), color = "darkgreen", alpha = 0.3) + 
+  geom_point(aes(x=women_ratio, y=ln_early_career_pay), color = "darkorange", alpha = 0.3) +
+  labs(
+    title = "Asian/Women Ratio Vs Early C. Pay", 
+    x = "Green: Asian and Orange: Women Students Percentage", 
+    y = "Ln of Early Career Pay")
+
+point4 <- college_dataset %>% 
+  ggplot() + 
+  geom_point(aes(x=stem_percent, y=ln_early_career_pay),  color ="purple", alpha = 0.6) + 
+  labs(
+    title = "STEM alumni Vs Early C. Payment", 
+    x = "Percentage of STEM Students", 
+    y = "Ln of Early Career Pay", 
+    color = "Type of Institution") 
+
+plot_grid(point1, point2, point3, point4, labels = "AUTO")
+
+
+```
+
+# Modeling
+## Preprocessing
+```{r, echo=FALSE}
+college_dataset_shrinked <- college_dataset %>% 
+  select(ln_early_career_pay,
+         asian_ratio,  
+         ln_out_of_state_tuition,
+         stem_percent, 
+         ln_total_enrollment,
+         women_ratio)
+```
+
+```{r, echo=FALSE}
+set.seed(123)
+train_control <-  trainControl(method = "cv", number = 10)
+
+inTrain <- createDataPartition(y = college_dataset_shrinked$ln_early_career_pay, p = 0.8, list = FALSE)
+
+train_data <- college_dataset_shrinked[inTrain , ]
+test_data <- college_dataset_shrinked[-inTrain , ]
+```
+
+```{r, echo=FALSE, results='hold'}
+#Separating the data
+sub_fit_pay <- regsubsets(ln_early_career_pay ~  asian_ratio + black_ratio + women_ratio + ln_room_and_board + ln_out_of_state_tuition + stem_percent + ln_total_enrollment + private, 
+                          data = college_dataset)
+
+best_summary <- summary(sub_fit_pay)
+
+#Plots
+par(mfrow = c(1,2)) 
+plot(best_summary$cp, xlab = "Number of features", ylab = "Mallows Cp", main = "Optimal Number of Predictors: Cp", col = "dark blue", type = "b")
+
+plot(sub_fit_pay, scale = "Cp", main = "Best Variables for Modelling", col = "dark red")
+par(mfrow = c(1,2))
+
+plot(best_summary$adjr2, xlab = "Number of features", ylab = "Adjusted-R^2", main = "Optimal Number of Predictors", col = "dark blue", type = "b")
+
+plot(best_summary$bic, xlab = "Number of features", ylab = "BIC", main = "Optimal Number of Predictors", col = "dark red", type = "b")
+```
+Based on the EDA, BIC, Mallows' CP, and the $Adjusted-R^2$, the models will be tested on the following predictors:  _ln_early_career_pay, asian_ratio, ln_out_of_state_tuition, stem_percent, ln_total_enrollment,_ and _women_ratio_.. More than this will result in overfitting.
+
+```{r, message=FALSE, echo=FALSE, results='hold'}
+ggpairs(data = college_dataset_shrinked, lower = list(continuous = wrap("smooth", alpha = 0.3, size=0.01)))
+```
+
+We then formed a correlation matrix between these variables; if variables are highly correlated, they can cause standard errors of models to be unreliable and cause poor models in general. From this, we found that the variables were, at most, about 60% correlated. This was not worrisome in itself, but certainly something to keep in mind when evaluating results.
+
+
+For testing purposes, we created a train control variable in order to establish that each model would be tested with 10-fold cross-validation. This is to ensure that the models are not overfitting in the training phase, and it gives feedback on how well the model is performing. We also split the data so that 80% of aribitrary but specific data is used to train, and the other 20% is used to test the model's performance. This is also done to avoid overfitting, and it is preferable to perform the final model selection with an out of sample criterion.
+
+
+## Best Model 
+
+### Random Forest
+```{r, message=FALSE}
+oob <- trainControl(method = "oob")
+cv_5 <- trainControl(method = "cv", number = 5)
+rf_grid <- expand.grid(mtry = 1:10)
+
+set.seed(825)
+rf_model <- train(ln_early_career_pay ~ ., data = train_data,
+                     method = "rf",
+                     trControl = oob,
+                     verbose = FALSE,
+                     tuneGrid = rf_grid)
+# print results
+rf_model
+```
+Random Forest happens to be one of the most popular algorithms in data science as it has the ability to both classify and regress data. As in the name, a random forest is made of __n__ number of individual decision trees that work together to provide accurate results. This is helpful in our project; some models that we are predicing may be inaccurate while some may have better results. Having a plethora of results that forms informational analysis will help with having less error in our data.
+The random forest has 391 samples and 6 predictors to work from. The best model with the smallest RMSE was of 0.07033335.
+
+```{r, message=FALSE, echo=FALSE, results='hide'}
+#Training Data for Random Forest
+random_forest_data <- predict(rf_model)
+
+unlog_forecast_rf <- exp(random_forest_data)
+
+unlog_actual_rf <- exp(train_data$ln_early_career_pay)
+
+ggplot(train_data, aes(x = unlog_forecast_rf, y = unlog_actual_rf),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") +  
+  labs(title = "Forecast versus Actual - Random Forest (Train Data)", x = "Forecast", y = "Actual")
+```
+We are training the model to predict _ln_early_career_pay_ on 80% of the data. The value of the residuals should be smaller that what was observed for Linear and PCA. This model seems slightly better due to the fact that we have a smaller error rate. 
+
+```{r, message=FALSE, echo=FALSE, results='hide'}
+rf_test <- predict(rf_model, test_data)
+
+RMSE2 <- (mean((rf_test - test_data$ln_early_career_pay)^2))^0.5
+RMSE2 
+
+#Test Data
+unlog_forecast_rf <- exp(rf_test)
+
+unlog_actual_rf <- exp(test_data$ln_early_career_pay)
+
+ggplot(test_data, aes(x = unlog_forecast_rf, y = unlog_actual_rf),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") + 
+  labs(title = "Forecast versus Actual - Random Forest (Test Data)", x = "Forecast", y = "Actual")
+```
+Random forest test data was modeled on 20% of the dataset. There seems to be a lot less points than Linear and PCA, but again random forest aims to reduce the error rate by having many trees to test different possible combinations. 
+
+### Model Comparison 
+For brevity, the model selection results are posted below. We chose to highlight the random forest model as it has the highest $R^2$ and the lowest in and out of sample RMSE. In order to see our analysis of the other models, see below in the *Other Techniques* section. Furthermore, the random forest model can be displayed as a decision tree, and it is easy to interpret by people out of the Data Science field since it mirrors the human decision making process.
+
+|Predictive Model |$R^2$ | In Sample RMSE | Out of Sample RMSE|
+|:----------|:---------------|:---------|:------------|
+|Ordinary Least Squares|0.7382|0.07665|0.08076483|
+|Ordinary Least Squares-glmnet|0.07715067|0.7468707|0.08027886|
+|Random Forest|0.7640539|0.07268202|0.0727503|
+|Principal Component Analysis|0.7417742|0.07682088|0.08076483|
+|Support Vector Machine|0.7367368|0.07692738|0.07923666|
+
+## Other Techniques
+
+### Simple Linear Regression
+```{r}
+earlypay_lm <- lm(ln_early_career_pay ~ ., 
+                  data = train_data)
+summary(earlypay_lm)
+```
+This __Ordinary Least Squares__ linear model is focused on the variable, _ln_early_career_pay_, and is being tested with seven other variables that were previously selected by the previous methods. The Adjusted-$R^2$ is 0.7487 and all predictors are statistically significant to the analysis. 
+
+```{r, echo=FALSE, message=FALSE, results='hide'}
+#Training Data for Linear Model
+lm_ep_train_data <- predict(earlypay_lm)
+
+unlog_forecast_lm <- exp(lm_ep_train_data)
+
+unlog_actual_lm <- exp(train_data$ln_early_career_pay)
+
+ggplot(train_data, aes(x = unlog_forecast_lm, y = unlog_actual_lm),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") +  
+  labs(title = "Forecast versus Actual - Linear Model (Train Data)", x = "Forecast", y = "Actual")
+
+#This linear model shows a comparison of the Forecast and Actual training data values of 80%. It is noticeable that most of the points are concentrated around the (50,000, 50,000) mark for both Forecast and Actual. The data points seems to be linear minus some outlier points. This could mean that there is an average of students having an early career pay of $50,000 after they grauduate college.
+```
+
+
+```{r, echo=FALSE, message=FALSE}
+#Testing Data on Linear Model
+lm_test_data <- predict(earlypay_lm, test_data)
+
+RMSE2 <- (mean((lm_test_data - test_data$ln_early_career_pay)^2))^0.5 
+RMSE2
+
+#Test Data
+unlog_forecast_lm <- exp(lm_test_data)
+
+unlog_actual_lm <- exp(test_data$ln_early_career_pay)
+
+ggplot(test_data, aes(x = unlog_forecast_lm, y = unlog_actual_lm),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") + 
+  labs(title = "Forecast versus Actual - Linear Model (Test Data)", x = "Forecast", y = "Actual")
+```
+The Root Mean Square Error of the out sample prediction was calculated by utilizing the testing set of the mean of the following difference squared: $(\hat{y}-y)^2$, also know as RMSE, the result was 0.005810831. 
+This is another linear graph that shows a comparison of the Actual and Forecast values, but only the test set or 20% of the data was used. Again, the data is mostly surrounded around the (50,000 , 50,000) mark.
+
+
+### PCA
+```{r}
+glm_pca_model <- train(ln_early_career_pay ~ . , 
+                 data = train_data, 
+                 method = "glm", 
+                 preProcess = "pca", 
+                 trControl = train_control)
+glm_pca_model
+```
+
+Principal Component Analysis, or PCA, is a type of linear transformation that allows you to visualize the overall format of the dataset. In a way, PCA "tilts" the dataset to be one dimensional. This will depend on the number of variables and will help to understand what variables are similar to each other and which are different. We utilized PCA to reduce the dimensionality of our dataset to make it easier to work with.
+In the linear model above, we have 391 samples with 8 predictors. The _Rsquared_ value of 0.7469513 tells us that the model that we are running is fitting the actual data by 74.7%. It is ideal for _RMSE_ values to be as small as possible. The _RMSE_ is 0.075609.
+
+```{r, echo=FALSE, results='hide', message=FALSE}
+#Training Data for PCA
+pca_train_data <- predict(glm_pca_model)
+
+unlog_forecast_pca <- exp(pca_train_data)
+
+unlog_actual_pca <- exp(train_data$ln_early_career_pay)
+
+ggplot(train_data, aes(x = unlog_forecast_pca, y = unlog_actual_pca), alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") +  
+  labs(title = "Forecast versus Actual - PCA (Train Data)", x = "Forecast", y = "Actual")
+# The PCA model shows the Forecast data being tested against Actual data. This training data is very similar to the training model for the Linear Model. This is important to take note of due to the function of PCA transforming large datasets into smaller ones. 
+```
+
+
+```{r, echo=FALSE, results='hold', message=FALSE}
+pca_test_data <- predict(glm_pca_model, test_data)
+
+RMSE2 <- (mean((pca_test_data - test_data$ln_early_career_pay)^2))^0.5
+RMSE2
+
+#Test Data
+unlog_forecast_pca <- exp(pca_test_data)
+
+unlog_actual_pca <- exp(test_data$ln_early_career_pay)
+
+ggplot(test_data, aes(x = unlog_forecast_pca, y = unlog_actual_pca),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") + 
+  labs(title = "Forecast versus Actual - PCA (Test Data)", x = "Forecast", y = "Actual")
+```
+The test data model shows the result of PCA's Forecast vs Actual. The data points continue to have a positive correlation to the red line.
+
+### SVM
+Preprocessing
+```{r, echo=FALSE}
+set.seed(123)
+college_dataset_shrinked <- na.omit(college_dataset_shrinked)
+
+
+#train control 
+tr_control <- trainControl(method = "cv", number = 10)
+
+# grid
+tGrid <- expand.grid(C = c(0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 5))
+```
+
+Model
+```{r, message=FALSE}
+# model 1:
+svm_model_1 <- train(ln_early_career_pay ~ .,
+  data = train_data, 
+  method = "svmLinear",
+  tuneGrid = tGrid, 
+  trControl = tr_control, 
+  metric = "RMSE",
+  preProcess = c("center", "scale")
+)
+svm_model_1
+```
+Support vector machine, SVM, is another type of classification model that utilizes two-group classification problems. The general analysis is on two groups, but it is possible to do more than that. Utilizing SVM will help us to analyze data points even if the dataset is linear or not. If it is not on a linear boundary, hyperplane and multiple dimensions can be used to group data points togther to produce the best and accurate values. The best model above had a value RMSE of 0.07623164 with and Rsquared of 0.7412840.
+
+```{r,echo=FALSE, results='hide', message=FALSE}
+#Training Data
+svm_train_data <- predict(svm_model_1)
+
+unlog_forecast_svm <- exp(svm_train_data)
+
+unlog_actual_svm <- exp(train_data$ln_early_career_pay)
+
+ggplot(train_data, aes(x = unlog_forecast_svm, y = unlog_actual_svm),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") +  
+  labs(title = "Forecast versus Actual - SVM (Train Data)", x = "Forecast", y = "Actual")
+```
+For this model of SVM, we see that out of all the models, this has more concentrated and smaller residual around the (50,000, 50,000) point. There is a substanial amount of outliers, but this could be in result of the hyperplane seperating the two classes.
+
+```{r, echo=FALSE, results='hold', message=FALSE}
+svm_test_data <- predict(svm_model_1, test_data)
+
+RMSE2 <- (mean((svm_test_data - test_data$ln_early_career_pay)^2))^0.5
+RMSE2
+#Test Data
+unlog_forecast_svm <- exp(svm_test_data)
+
+unlog_actual_svm <- exp(test_data$ln_early_career_pay)
+
+ggplot(test_data, aes(x = unlog_forecast_svm, y = unlog_actual_svm),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") + 
+  labs(title = "Forecast versus Actual - SVM (Test Data)", x = "Forecast", y = "Actual")
+```
+This SVM model shows 20% of the tested data on the dataset. It seems more distrubted along the regression line with some outliers. The residuals are a little bit greater than the test model from random forest, whose data points were much closer to the regression line. Between the two models, we could say that random forests seems to provide a more accurate result. 
+
+### LASSO
+
+```{r}
+set.seed(981)
+#10 fold CV
+train_control <-  trainControl(method = "cv", number = 10)
+#Grid
+grid <- seq(-2,10,length=100)
+
+lasso_model <- train(ln_early_career_pay ~ .,
+                     data = train_data, 
+                     method = "glmnet", 
+                     trControl = train_control,
+                     metric =  "Rsquared",
+                     tune_Grid = expand.grid(alpha = 1, lambda = grid))
+lasso_model
+```
+This __Ordinary Least Squares with LASSO penalization__ linear model contains the seven variables previously used in the linear model tested against the _ln_early_career_pay_.The best LASSO model has a $alpha=0.1$ and $lambda=0.01917911$. The highest $R^2$ is 0.7527662. LASSO increases the variance explained for the predictive model, but it also has a small penalty increasing the bias.
+
+```{r,echo=FALSE, message=FALSE, results='hide'}
+#Training Data
+lasso_train_data <- predict(lasso_model)
+
+unlog_forecast_lasso <- exp(lasso_train_data)
+
+unlog_actual_lasso <- exp(train_data$ln_early_career_pay)
+
+ggplot(train_data, aes(x = unlog_forecast_lasso, y = unlog_actual_lasso),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") +  
+  labs(title = "Forecast versus Actual - LASSO (Train Data)", x = "Forecast", y = "Actual")
+
+#This graph shows a comparison of the Actual and Forecast values when this linear model is used. It is noticeable that most of the points are concentrated around the line and that the actual value are not as different when compared to the forecast. This way, LASSO is also a candidate model for the final model selection process.
+```
+
+
+```{r, echo=FALSE, results='hold', message=FALSE}
+test_lasso <- predict(lasso_model, test_data)
+
+RMSE2 <- (mean((test_lasso - test_data$ln_early_career_pay)^2))^0.5
+RMSE2
+#Test Data
+unlog_forecast_lasso <- exp(test_lasso)
+
+unlog_actual_lasso <- exp(test_data$ln_early_career_pay)
+
+ggplot(test_data, aes(x = unlog_forecast_lasso, y = unlog_actual_lasso),alpha = 0.6) + 
+  geom_point(color = "Blue") + 
+  geom_smooth(method = lm, color = "Red") + 
+  labs(title = "Forecast versus Actual - LASSO (Test Data)", x = "Forecast", y = "Actual")
+```
+When the _test set_ was used for an out of sample prediction, it is clear that the regression line for the Forecast versus Actual values presents a bettet result when compared to the simple OLS model. Observation fall closer to the line and the Out of Sample RMSE is 0.62077, which does not represent a significant increase in bias, when compared to gain on explanatory power when the LASSO penalization was used.
