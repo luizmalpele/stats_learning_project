@@ -186,7 +186,7 @@ point1 <- college_dataset %>%
   ggplot() + 
   geom_point(aes(x=ln_out_of_state_tuition, y=ln_early_career_pay, color = type), alpha = 0.6) + 
   labs(
-    title = "Out-of-State Tuition Vs Early Payment", 
+    title = "Out-of-State Tuition Vs Early C. Pay", 
     x = "Ln of Out of State Tuition", 
     y = "Ln of Early Career Pay", 
     color = "Institution") + scale_color_brewer(palette = "Set1")
@@ -195,66 +195,32 @@ point2 <- college_dataset %>%
   ggplot() + 
   geom_point(aes(x=ln_total_enrollment, y=ln_early_career_pay, color = type), alpha = 0.6) + 
   labs(
-    title = "Total Enrollment Vs Early Payment", 
+    title = "Total Enrollment Vs Early C. Pay", 
     x = "Ln of Total Enrollment", 
     y = "Ln of Early Career Pay", 
     color = "Institution") + scale_color_brewer(palette = "Set1")
 
 point3 <- college_dataset %>% 
   ggplot() + 
-  geom_point(aes(x=asian_ratio, y=ln_early_career_pay), color = "tomato2", alpha = 0.6) + 
+  geom_point(aes(x=asian_ratio, y=ln_early_career_pay), color = "darkgreen", alpha = 0.3) + 
+  geom_point(aes(x=women_ratio, y=ln_early_career_pay), color = "darkorange", alpha = 0.3) +
   labs(
-    title = "Asian Ratio Vs Early Payment", 
-    x = "Asian Students Percentage", 
-    y = "Ln of Early Career Pay") + scale_color_brewer(palette = "Set1")
+    title = "Asian/Women Ratio Vs Early C. Pay", 
+    x = "Green: Asian and Orange: Women Students Percentage", 
+    y = "Ln of Early Career Pay")
 
 point4 <- college_dataset %>% 
   ggplot() + 
-  geom_point(aes(x=black_ratio, y=ln_early_career_pay),  color ="cornflowerblue", alpha = 0.6) + 
+  geom_point(aes(x=stem_percent, y=ln_early_career_pay),  color ="purple", alpha = 0.6) + 
   labs(
-    title = "Black Ratio Vs Early Payment", 
-    x = "Black Students Percentage", 
+    title = "STEM alumni Vs Early C. Payment", 
+    x = "Percentage of STEM Students", 
     y = "Ln of Early Career Pay", 
     color = "Type of Institution") 
 
 plot_grid(point1, point2, point3, point4, labels = "AUTO")
 
-point5 <- college_dataset %>% 
-  ggplot() + 
-  geom_point(aes(x=ln_out_of_state_tuition, y=ln_mid_career_pay, color = type), alpha = 0.6) + 
-  labs(
-    title = "Out-of-State Tuition Vs Mid Payment", 
-    x = "Ln of Out of State Tuition", 
-    y = "Ln of Mid Career Pay", 
-    color = "Institution") + scale_color_brewer(palette = "Set1")
 
-point6 <- college_dataset %>% 
-  ggplot() + 
-  geom_point(aes(x=ln_total_enrollment, y=ln_mid_career_pay, color = type), alpha = 0.6) + 
-  labs(
-    title = "Total Enrollment Vs Mid Payment", 
-    x = "Ln of Total Enrollment", 
-    y = "Ln of Mid Career Pay", 
-    color = "Institution") + scale_color_brewer(palette = "Set1")
-
-point7 <- college_dataset %>% 
-  ggplot() + 
-  geom_point(aes(x=asian_ratio, y=ln_mid_career_pay), color = "tomato2", alpha = 0.6) + 
-  labs(
-    title = "Asian Ratio Vs Mid Payment", 
-    x = "Asian Students Percentage", 
-    y = "Ln of Mid Career Pay") + scale_color_brewer(palette = "Set1")
-
-point8 <- college_dataset %>% 
-  ggplot() + 
-  geom_point(aes(x=black_ratio, y=ln_mid_career_pay),  color ="cornflowerblue", alpha = 0.6) + 
-  labs(
-    title = "Black Ratio Vs Mid Payment", 
-    x = "Black Students Percentage", 
-    y = "Ln of Mid Career Pay", 
-    color = "Type of Institution") 
-
-plot_grid(point5, point6, point7, point8, labels = "AUTO")
 ```
 
 # Modeling
@@ -361,6 +327,15 @@ ggplot(test_data, aes(x = unlog_forecast_rf, y = unlog_actual_rf),alpha = 0.6) +
   labs(title = "Forecast versus Actual - Random Forest (Test Data)", x = "Forecast", y = "Actual")
 ```
 Random forest test data was modeled on 20% of the dataset. There seems to be a lot less points than Linear and PCA, but again random forest aims to reduce the error rate by having many trees to test different possible combinations. 
+
+```{r}
+library(tree)
+rf_plot <- tree(ln_early_career_pay ~ ., data = train_data,
+                     method = "rf")
+plot(rf_plot)
+text(rf_plot)
+```
+
 
 ### Model Comparison 
 For brevity, the model selection results are posted below. We chose to highlight the random forest model as it has the highest $R^2$ and the lowest in and out of sample RMSE. In order to see our analysis of the other models, see below in the *Other Techniques* section. Furthermore, the random forest model can be displayed as a decision tree, and it is easy to interpret by people out of the Data Science field since it mirrors the human decision making process.
